@@ -2,7 +2,7 @@ import pygame
 import random
 import sys
 from dataclasses import dataclass
-
+#
 # Nastavení
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
