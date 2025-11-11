@@ -1,0 +1,12 @@
+& "g:/win32app/Portable Python-3.13.3 x64/python.exe" -m venv venv
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+.\venv\Scripts\activate
+
+"git.path": "G:/win32app/git_portable/cmd/git.exe",
+"git.enabled": true,
+
+git config --global user.email "koudelkamatje@seznam.cz"
+git config --global user.name "koudelkaMatej"
+
+pip freeze > requirements.txt
+pip install -r .\requirements.txt   
