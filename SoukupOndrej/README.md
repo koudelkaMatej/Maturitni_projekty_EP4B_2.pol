@@ -1,1 +1,1 @@
-# Maturitni_projekty_EP4B_2.pol
+# Flappy Bird – Playable\n\nInstalace: `pip install -r requirements.txt`\n\nSpuštění: `python main.py`\n
