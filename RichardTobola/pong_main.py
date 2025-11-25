@@ -16,10 +16,10 @@ ball = pygame.Rect(WIDTH//2 - 15, HEIGHT//2 - 15, 30, 30)
 player = pygame.Rect(WIDTH - 20, HEIGHT//2 - 70, 10, 140)
 opponent = pygame.Rect(10, HEIGHT//2 - 70, 10, 140)
 
-ball_speed_x = 6
-ball_speed_y = 6
+ball_speed_x = 8
+ball_speed_y = 8
 player_speed = 0
-opponent_speed = 6
+opponent_speed = 8
 
 player_score = 0
 opponent_score = 0
