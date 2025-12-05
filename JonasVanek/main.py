@@ -5,6 +5,7 @@ import json
 import urllib.request
 import urllib.error
 import urllib.parse
+from pathlib import Path
 
 pygame.init()
 WIDTH, HEIGHT = 600, 800
@@ -22,25 +23,51 @@ gravity = 0.5
 jump_strength = -10
 clock = pygame.time.Clock()
 
-## cesta k adresari s obrazky
-IMG_DIR = "img/"
+## cesta k adresari s obrazky - relativně vůči tomuto souboru
+BASE_DIR = Path(__file__).resolve().parent
+IMG_DIR = BASE_DIR / "img"
+
+## pomocná funkce pro bezpečné načtení obrázku (vrátí surface nebo fallback surface)
+def load_image_safe(path: Path, convert_alpha=True):
+    try:
+        if convert_alpha:
+            return pygame.image.load(str(path)).convert_alpha()
+        else:
+            return pygame.image.load(str(path)).convert()
+    except Exception:
+        # fallback: malý průhledný povrch se zakreslením hranice pro debug
+        surf = pygame.Surface((50, 50), pygame.SRCALPHA)
+        pygame.draw.rect(surf, (255, 0, 0), surf.get_rect(), width=2)
+        return surf
 
 ## assety (všechny obrázky se načítají z IMG_DIR)
 # pozadí
-bg_img = pygame.image.load(IMG_DIR + "pozadi.png").convert()
-bg_img = pygame.transform.scale(bg_img, (WIDTH, HEIGHT))
+bg_path = IMG_DIR / "pozadi.png"
+try:
+    bg_img = pygame.image.load(str(bg_path)).convert()
+    bg_img = pygame.transform.scale(bg_img, (WIDTH, HEIGHT))
+except Exception:
+    # fallback: jednoduché jednobarevné pozadí s jemným gradientem-like náhražkou
+    bg_img = pygame.Surface((WIDTH, HEIGHT))
+    bg_img.fill((180, 220, 255))
 
 # --- načtení 3 snímků ptáčka pro animaci mávání (z img/) ---
-bird_frame_files = [IMG_DIR + "bird1.png", IMG_DIR + "bird2.png", IMG_DIR + "bird3.png"]
+bird_frame_files = [IMG_DIR / "bird1.png", IMG_DIR / "bird2.png", IMG_DIR / "bird3.png"]
 bird_frames = []
 BIRD_SIZE = (50, 50)
 for fname in bird_frame_files:
-    img = pygame.image.load(fname).convert_alpha()
-    img = pygame.transform.scale(img, BIRD_SIZE)
+    try:
+        img = pygame.image.load(str(fname)).convert_alpha()
+        img = pygame.transform.smoothscale(img, BIRD_SIZE)
+    except Exception:
+        # pokud chybí obrázek, vytvoříme jednoduchý barevný kruhový ptáček
+        img = pygame.Surface(BIRD_SIZE, pygame.SRCALPHA)
+        pygame.draw.ellipse(img, (255, 200, 0), img.get_rect())
+        pygame.draw.circle(img, (0, 0, 0), (int(BIRD_SIZE[0]*0.65), int(BIRD_SIZE[1]*0.35)), 3)
     bird_frames.append(img)
 
 # index neutrálního snímku (když pták není v animaci)
-NEUTRAL_FRAME_IDX = 1
+NEUTRAL_FRAME_IDX = 1 if len(bird_frames) > 1 else 0
 
 # animace mávnutí
 bird_frame_index = NEUTRAL_FRAME_IDX
@@ -51,14 +78,23 @@ flap_frame_timer = 0
 flap_active = False
 
 # trubka
-pipe_img = pygame.image.load(IMG_DIR + "palachvez.png").convert_alpha()
-PIPE_WIDTH = 80
-pipe_img = pygame.transform.scale(pipe_img, (PIPE_WIDTH, 500))
+pipe_path = IMG_DIR / "palachvez.png"
+try:
+    pipe_img = pygame.image.load(str(pipe_path)).convert_alpha()
+    # škálování později podle výšky trubky; zde nastavíme šířku
+    PIPE_WIDTH = 80
+    pipe_img = pygame.transform.smoothscale(pipe_img, (PIPE_WIDTH, pipe_img.get_height()))
+except Exception:
+    # fallback jednoduchá trubka
+    PIPE_WIDTH = 80
+    pipe_img = pygame.Surface((PIPE_WIDTH, 200), pygame.SRCALPHA)
+    pygame.draw.rect(pipe_img, (60, 180, 60), pipe_img.get_rect())
 pipe_img_flipped = pygame.transform.flip(pipe_img, False, True)
 
 # načtení game over obrázku (z img/)
+gameover_path = IMG_DIR / "gameover.png"
 try:
-    gameover_img = pygame.image.load(IMG_DIR + "gameover.png").convert_alpha()
+    gameover_img = pygame.image.load(str(gameover_path)).convert_alpha()
     gameover_img = pygame.transform.smoothscale(gameover_img, (min(500, WIDTH - 40), 140))
 except Exception:
     gameover_img = FONT.render("Game Over!", True, BLACK)
@@ -67,13 +103,13 @@ except Exception:
 digit_images = {}
 DIGIT_BASE_HEIGHT = 80  # výchozí výška pro obrazky, můžeme je zmenšit při vykreslování HUD
 for d in range(0, 10):
-    fname = f"{IMG_DIR}{d}.png"
+    fname = IMG_DIR / f"{d}.png"
     key = str(d)
     try:
-        img = pygame.image.load(fname).convert_alpha()
+        img = pygame.image.load(str(fname)).convert_alpha()
         iw, ih = img.get_size()
-        scale = DIGIT_BASE_HEIGHT / ih
-        img = pygame.transform.smoothscale(img, (int(iw * scale), DIGIT_BASE_HEIGHT))
+        scale = DIGIT_BASE_HEIGHT / ih if ih != 0 else 1
+        img = pygame.transform.smoothscale(img, (max(1, int(iw * scale)), DIGIT_BASE_HEIGHT))
         digit_images[key] = img
     except Exception:
         surf = FONT.render(key, True, BLACK)
@@ -464,7 +500,7 @@ def render_score_with_images(score, top_left_x, top_left_y, target_height=40, sp
             base = FONT.render(ch, True, BLACK)
         # přepočet škálování - zachovat poměr stran
         bw, bh = base.get_size()
-        scale = target_height / bh
+        scale = target_height / bh if bh != 0 else 1
         new_w = max(1, int(bw * scale))
         surf = pygame.transform.smoothscale(base, (new_w, target_height))
         surfaces.append(surf)
@@ -502,10 +538,18 @@ def draw_game(bird_image_rotated, bird_rect, pipe_x, pipe_height, score, player_
     # vykreslit rotovaný snímek ptáčka
     WIN.blit(bird_image_rotated, bird_rect)
 
-    # trubky
-    top_pipe = pygame.transform.scale(pipe_img_flipped, (PIPE_WIDTH, max(1, pipe_height)))
-    bottom_height = max(1, HEIGHT - pipe_height - gap)
-    bottom_pipe = pygame.transform.scale(pipe_img, (PIPE_WIDTH, bottom_height))
+    # trubky - přeskálujeme výšku trubky podle pipe_img/původní výšky
+    try:
+        # top pipe
+        top_pipe = pygame.transform.smoothscale(pipe_img_flipped, (PIPE_WIDTH, max(1, pipe_height)))
+        bottom_height = max(1, HEIGHT - pipe_height - gap)
+        bottom_pipe = pygame.transform.smoothscale(pipe_img, (PIPE_WIDTH, bottom_height))
+    except Exception:
+        top_pipe = pygame.Surface((PIPE_WIDTH, max(1, pipe_height)))
+        top_pipe.fill((60, 180, 60))
+        bottom_height = max(1, HEIGHT - pipe_height - gap)
+        bottom_pipe = pygame.Surface((PIPE_WIDTH, bottom_height))
+        bottom_pipe.fill((60, 180, 60))
 
     WIN.blit(top_pipe, (pipe_x, 0))
     WIN.blit(bottom_pipe, (pipe_x, pipe_height + gap))
