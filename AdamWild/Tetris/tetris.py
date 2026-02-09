@@ -312,7 +312,7 @@ def play_game(screen, width, height, fullscreen=False):
                 elif event.key==pygame.K_ESCAPE:
                     return
 
-        # zrychlování po každých 1000 bodech
+        # zrychlování po každých 1000 bodech jj
         fall_speed = max(0.1, 0.6 - (score // 100) * 0.05)
 
         # kreslení
