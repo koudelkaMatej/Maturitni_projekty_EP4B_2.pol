@@ -46,7 +46,7 @@ SHAPES = [
     [[1, 1, 0], [0, 1, 1]]
 ]
 
-# --- absolutní cesta pro highscore, funguje i u exe ---
+# --- absolutní cesta pro highscore, funguje 
 HIGHSCORE_FILE = os.path.join(os.path.dirname(sys.argv[0]), "highscores.json")
 
 # --- FUNKCE PRO HIGHSCORE ---
@@ -64,24 +64,35 @@ def save_highscores(scores):
         json.dump(scores, f, indent=4)
 
 def save_score_online(name, score):
-    """Uloží skóre do online databáze"""
+    """Uloží skóre online přes GET (pro školní server)"""
     try:
-        data = {
+        params = {
             'jmeno': name,
             'skore': score,
             'token': API_TOKEN
         }
-        response = requests.post(API_URL, json=data, timeout=5)
+        response = requests.get(API_URL, params=params, timeout=5)
         if response.status_code == 200:
-            return True, "Skóre úspěšně uloženo online!"
+            # Pokusíme se načíst JSON
+            try:
+                data = response.json()
+                if data.get('success'):
+                    return True, "Skóre úspěšně uloženo online!"
+                else:
+                    return False, f"Chyba serveru: {data.get('error', response.text)}"
+            except Exception:
+                return False, f"Server vrátil neplatnou odpověď: {response.text}"
         else:
-            return False, f"Chyba serveru: {response.status_code}"
+            return False, f"Chyba serveru: {response.status_code} - {response.text}"
     except requests.exceptions.Timeout:
         return False, "Timeout - server neodpovídá"
     except requests.exceptions.ConnectionError:
         return False, "Nelze se připojit k serveru"
     except Exception as e:
         return False, f"Chyba: {str(e)}"
+
+
+
 
 def load_online_leaderboard(limit=10):
     """Načte žebříček z online databáze"""
