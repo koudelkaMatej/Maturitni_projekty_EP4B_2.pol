@@ -3,6 +3,7 @@ import random
 import sys
 from dataclasses import dataclass
 #
+
 # Nastavení
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -19,12 +20,12 @@ settings = {
 
 # Obtížnosti
 DIFFICULTY_PARAMS = {
-    'Easy': {'fall_speed': 3, 'spawn_interval': 900},
-    'Normal': {'fall_speed': 4.5, 'spawn_interval': 700},
-    'Hard': {'fall_speed': 6, 'spawn_interval': 450},
+    'Easy': {'fall_speed': 2, 'spawn_interval': 900},
+    'Normal': {'fall_speed': 3, 'spawn_interval': 700},
+    'Hard': {'fall_speed': 4.5, 'spawn_interval': 450},
 }
 
-# Barvy
+# Barvy - nastavení
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (50, 200, 50)
@@ -40,6 +41,21 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont(FONT_NAME, 28)
 large_font = pygame.font.SysFont(FONT_NAME, 48)
 small_font = pygame.font.SysFont(FONT_NAME, 20)
+
+# Pozadí
+background = pygame.image.load("obrazky/background.png").convert()
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill((WHITE))
+    screen.blit(background, (0, 0))
+    # screen.blit(text, (300, 50))
+
+    pygame.display.update()
 
 # Třídy
 class Player(pygame.sprite.Sprite):
@@ -109,6 +125,9 @@ def game_loop():
             obj = FallingObject(x, 0, FALL_SIZE, color, kind, params['fall_speed'])
             objects.append(obj)
 
+        # Zvětšování obtížnosti - blok increase
+
+
         # Aktualizace hráče
         player.update(keys)
         screen.blit(player.image, player.rect)
@@ -119,9 +138,9 @@ def game_loop():
             pygame.draw.rect(screen, obj.color, obj.rect())
             if obj.rect().colliderect(player.rect):
                 if obj.kind == 'fruit':
-                    score += 1
+                    score += 5
                 else:
-                    score = max(0, score - 2)
+                    score = max(0, score - 10)
                 objects.remove(obj)
             elif obj.y > SCREEN_HEIGHT:
                 objects.remove(obj)
