@@ -7,14 +7,12 @@ from dataclasses import dataclass
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
-PLAYER_WIDTH = 80
-PLAYER_HEIGHT = 20
-FALL_SIZE = 30
+PLAYER_WIDTH = 240
+PLAYER_HEIGHT = 120
+FALL_SIZE = 80
 
 # Výchozí nastavení hry
-settings = {
-    'difficulty': 'Normal',  # 'Easy', 'Normal', 'Hard'
-}
+settings = {'difficulty': 'Normal'}  # 'Easy', 'Normal', 'Hard'
 
 DIFFICULTY_PARAMS = {
     'Easy': {'fall_speed': 2, 'spawn_interval': 900},
@@ -25,37 +23,30 @@ DIFFICULTY_PARAMS = {
 # Barvy
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (50, 200, 50)
 RED = (220, 40, 40)
+GREEN = (50, 200, 50)
 DARK_GRAY = (50, 50, 50)
 GRAY = (200, 200, 200)
-ORANGE = (255, 140, 0)
-
+PURPLE = (128, 0, 128)
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('FruitCatcher')
 clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 28)
-large_font = pygame.font.SysFont(None, 48)
-small_font = pygame.font.SysFont(None, 20)
+font = pygame.font.SysFont(None, 42)
+large_font = pygame.font.SysFont(None, 74)
+small_font = pygame.font.SysFont(None, 36)
 
-# --- Načítání obrázků (s fallback) ---
-def load_image(path, size=None):
-    try:
-        img = pygame.image.load(path).convert_alpha()
-        if size is not None:
-            img = pygame.transform.smoothscale(img, size)
-        return img
-    except Exception:
-        return None
+# --- Načítání obrázků ---
+def load_image(path, size):
+    img = pygame.image.load(path).convert_alpha()
+    img = pygame.transform.scale(img, size)
+    img.set_colorkey((255, 255, 255))
+    return img
 
-# pozadí
+# obrázky
 background = load_image("obrazky/background.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-
-# objekty
-player_img = load_image("obrazky/Kosik.png", (120, 70))
+player_img = load_image("obrazky/Kosik.png", (PLAYER_WIDTH, PLAYER_HEIGHT))
 fruit_img = load_image("obrazky/fruit.png", (FALL_SIZE, FALL_SIZE))
 bomb_img = load_image("obrazky/bomb.png", (FALL_SIZE, FALL_SIZE))
 gold_img = load_image("obrazky/goldfruit.png", (FALL_SIZE, FALL_SIZE))
@@ -63,15 +54,14 @@ heart_img = load_image("obrazky/heart.png", (32, 32))
 
 # --- Třídy ---
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, speed=6):
+    def __init__(self, x, y, speed=6):
         super().__init__()
-        if player_img:
-            self.image = player_img
-        else:
-            self.image = pygame.Surface((width, height))
+        self.image = player_img if player_img else pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
+        if not player_img:
             self.image.fill(DARK_GRAY)
             pygame.draw.rect(self.image, BLACK, self.image.get_rect(), 2)
         self.rect = self.image.get_rect(midbottom=(x, y))
+        self.mask = pygame.mask.from_surface(self.image)
         self.speed = speed
 
     def update(self, keys):
@@ -79,24 +69,31 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.rect.x += self.speed
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
+        self.rect.left = max(self.rect.left, 0)
+        self.rect.right = min(self.rect.right, SCREEN_WIDTH)
 
 @dataclass
 class FallingObject:
     x: float
     y: float
-    width: int
-    height: int
-    kind: str            # 'fruit', 'bomb', 'goldfruit'
+    kind: str
     speed: float
+    width: int = FALL_SIZE
+    height: int = FALL_SIZE
     image: pygame.Surface = None
     color: tuple = None
 
     def rect(self):
         return pygame.Rect(int(self.x), int(self.y), self.width, self.height)
+
+    @property
+    def mask(self):
+        if self.image:
+            return pygame.mask.from_surface(self.image)
+        else:
+            temp = pygame.Surface((self.width, self.height))
+            temp.fill(self.color if self.color else GRAY)
+            return pygame.mask.from_surface(temp)
 
 # --- Pomocné funkce ---
 def draw_text(text, font_obj, color, surface, x, y, center=True):
@@ -105,7 +102,7 @@ def draw_text(text, font_obj, color, surface, x, y, center=True):
     surface.blit(txt, rect)
 
 def spawn_object(params):
-    kinds = ['fruit'] * 6 + ['bomb'] * 2 + ['goldfruit']  # váhy
+    kinds = ['fruit']*6 + ['bomb']*2 + ['goldfruit']
     kind = random.choice(kinds)
     x = random.randint(0, SCREEN_WIDTH - FALL_SIZE)
     speed = params['fall_speed'] + random.uniform(-0.5, 1.0)
@@ -117,12 +114,12 @@ def spawn_object(params):
         color = RED
     else:
         img = gold_img
-        color = (255, 215, 0)  # zlatá pokud není obrázek
-    return FallingObject(x, 0, FALL_SIZE, FALL_SIZE, kind, speed, image=img, color=color)
+        color = (255, 215, 0)
+    return FallingObject(x, 0, kind, speed, image=img, color=color)
 
-# --- HERNÍ SMYČKA ---
+# --- Herní smyčka ---
 def game_loop():
-    player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 40, PLAYER_WIDTH, PLAYER_HEIGHT)
+    player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 40)
     objects = []
     score = 0
     lives = 3
@@ -139,9 +136,9 @@ def game_loop():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return  # návrat do menu
+                return
 
-        # spawn
+        # spawn objektů
         if pygame.time.get_ticks() - spawn_timer > params['spawn_interval']:
             spawn_timer = pygame.time.get_ticks()
             objects.append(spawn_object(params))
@@ -149,13 +146,10 @@ def game_loop():
         # update hráče
         player.update(keys)
 
-        # vykreslení pozadí hry
-        if background:
-            screen.blit(background, (0, 0))
-        else:
-            screen.fill(WHITE)
+        # vykreslení pozadí
+        screen.blit(background, (0, 0)) if background else screen.fill(WHITE)
 
-        # aktualizace a vykreslení objektů
+        # update a kolize objektů
         for obj in objects[:]:
             obj.y += obj.speed
             r = obj.rect()
@@ -164,8 +158,9 @@ def game_loop():
             else:
                 pygame.draw.rect(screen, obj.color if obj.color else GRAY, r)
 
-            # kolize s hráčem
-            if r.colliderect(player.rect):
+            # kolize přes masky
+            offset = (int(r.x - player.rect.x), int(r.y - player.rect.y))
+            if player.mask.overlap(obj.mask, offset):
                 if obj.kind == 'fruit':
                     score += 5
                 elif obj.kind == 'goldfruit':
@@ -177,15 +172,13 @@ def game_loop():
 
             # pokud spadne dolů
             if obj.y > SCREEN_HEIGHT:
-                # uvažuj penalizaci pokud chceš (zatím žádná)
                 objects.remove(obj)
 
         # vykresli hráče
         screen.blit(player.image, player.rect)
 
-        # HUD: skóre a životy
+        # HUD
         draw_text(f"Skóre: {score}", font, BLACK, screen, 80, 30, center=False)
-        # životy: buď ikony nebo text
         if heart_img:
             for i in range(lives):
                 screen.blit(heart_img, (SCREEN_WIDTH - 40 - i*36, 10))
@@ -194,38 +187,32 @@ def game_loop():
 
         pygame.display.flip()
 
-        # konečnost hry
         if lives <= 0:
             game_over_loop(score)
-            return  # po Game Over návrat do menu
+            return
 
+# --- Game Over ---
 def game_over_loop(final_score):
-    # zobrazení Game Over a nabídka restart/menu
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:  # restart hry hned
+                if event.key == pygame.K_r:
                     game_loop()
                     return
-                elif event.key == pygame.K_ESCAPE:  # návrat do menu
+                elif event.key == pygame.K_ESCAPE:
                     return
 
-        if background:
-            screen.blit(background, (0, 0))
-        else:
-            screen.fill((30, 30, 30))
-
+        screen.blit(background, (0, 0)) if background else screen.fill((30,30,30))
         draw_text("GAME OVER", large_font, RED, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 80)
         draw_text(f"Skóre: {final_score}", font, BLACK, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 20)
-        draw_text("Stiskni R pro restart, ESC pro návrat do menu", small_font, DARK_GRAY, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 40)
-
+        draw_text("Stiskni R pro restart, ESC pro návrat", small_font, DARK_GRAY, screen, SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 40)
         pygame.display.flip()
         clock.tick(FPS)
 
-# --- NASTAVENÍ MENU ---
+# --- Menu ---
 def settings_menu():
     selected = list(DIFFICULTY_PARAMS.keys()).index(settings['difficulty'])
     options = list(DIFFICULTY_PARAMS.keys())
@@ -243,25 +230,18 @@ def settings_menu():
                 elif event.key == pygame.K_RIGHT:
                     selected = (selected + 1) % len(options)
 
-        if background:
-            screen.blit(background, (0, 0))
-        else:
-            screen.fill(WHITE)
-
-        draw_text("Nastavení", large_font, BLACK, screen, SCREEN_WIDTH // 2, 100)
+        screen.blit(background, (0,0)) if background else screen.fill(WHITE)
+        draw_text("Nastavení", large_font, BLACK, screen, SCREEN_WIDTH//2, 100)
         for i, diff in enumerate(options):
-            color = ORANGE if i == selected else BLACK
-            draw_text(diff, font, color, screen, SCREEN_WIDTH // 2, 250 + i * 60)
-        draw_text("<- -> pro změnu, ESC pro návrat", small_font, DARK_GRAY, screen, SCREEN_WIDTH // 2, 500)
-
+            color = PURPLE if i == selected else BLACK
+            draw_text(diff, font, color, screen, SCREEN_WIDTH//2, 250 + i*60)
+        draw_text("<- -> pro změnu, ESC pro návrat", small_font, DARK_GRAY, screen, SCREEN_WIDTH//2, 500)
         pygame.display.flip()
         clock.tick(FPS)
 
-# --- HLAVNÍ MENU ---
 def main_menu():
     selected = 0
     options = ["Hrát", "Nastavení", "Konec"]
-
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -281,16 +261,11 @@ def main_menu():
                         pygame.quit()
                         sys.exit()
 
-        if background:
-             screen.blit(background, (0, 0))
-        else:
-            screen.fill(WHITE)
-
-        draw_text("FruitCatcher", large_font, DARK_GRAY, screen, SCREEN_WIDTH // 2, 150)
+        screen.blit(background, (0,0)) if background else screen.fill(WHITE)
+        draw_text("FruitCatcher", large_font, DARK_GRAY, screen, SCREEN_WIDTH//2, 150)
         for i, opt in enumerate(options):
-            color = ORANGE if i == selected else BLACK
-            draw_text(opt, font, color, screen, SCREEN_WIDTH // 2, 300 + i * 60)
-
+            color = PURPLE if i == selected else BLACK
+            draw_text(opt, font, color, screen, SCREEN_WIDTH//2, 300 + i*60)
         pygame.display.flip()
         clock.tick(FPS)
 
