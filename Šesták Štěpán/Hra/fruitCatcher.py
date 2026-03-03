@@ -191,7 +191,7 @@ def game_loop():
                 if obj.kind == 'fruit':
                     score += 5
                 elif obj.kind == 'goldfruit':
-                    score += 100
+                    score += 25
                 elif obj.kind == 'bomb':
                     lives -= 1
                 to_remove.append(obj)
