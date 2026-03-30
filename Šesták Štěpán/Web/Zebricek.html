@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zebricek – Food Catcher</title>
+    <link rel="stylesheet" href="Index.css">
+</head>
+<body>
+
+<header>
+    <h1>Food Catcher</h1>
+    <div class="header-right">
+        <nav>
+            <a href="Index.html">Domu</a>
+            <a href="Zebricek.html" class="active">Zebricek</a>
+            <a href="Prihlaseni.html">Prihlaseni</a>
+        </nav>
+        <div id="header-user-slot"></div>
+    </div>
+</header>
+
+<main id="main-content">
+
+    <div class="lb-header">
+        <h2>Zebricek hracu</h2>
+        <p>Vysledky ze hry Food Catcher – serazeno od nejvyssího skore.</p>
+    </div>
+
+    <div class="lb-tabs">
+        <button class="lb-tab active" id="tab-all"  onclick="switchTab('all')">Vsichni hraci</button>
+        <button class="lb-tab"        id="tab-mine" onclick="switchTab('mine')">Moje vysledky</button>
+    </div>
+
+    <div id="stats-panel" style="display:none;">
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-val" id="stat-games">–</div>
+                <div class="stat-lbl">Odehranych her</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-best">–</div>
+                <div class="stat-lbl">Nejlepsi skore</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-avg">–</div>
+                <div class="stat-lbl">Prumerne skore</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-rank">–</div>
+                <div class="stat-lbl">Celkove poradi</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lb-container">
+        
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Hráč</th>
+                        <th>Skóre</th>
+                        <th>Čas</th>
+                        <th>Obtížnost</th>
+                    </tr>
+                </thead>
+                <tbody>
+            <tr>
+                <td class="rank-1">🥇</td>
+                <td>Kralik1</td>
+                <td class="score-cell">1595</td>
+                <td>2:27</td>
+                <td><span class="badge badge-Normal">Normal</span></td>
+            </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-top:22px;">
+        <button class="refresh-btn" onclick="location.reload()">Obnovit</button>
+    </div>
+
+</main>
+
+<footer><p>2025 Food Catcher</p></footer>
+
+<script src="auth.js"></script>
+<script>
+    const ALL_ENTRIES = [{"name": "Kralik1", "score": 1595, "difficulty": "Normal", "time": 147}];
+
+    let currentTab = 'all';
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-all').classList.toggle('active',  tab === 'all');
+        document.getElementById('tab-mine').classList.toggle('active', tab === 'mine');
+        document.getElementById('stats-panel').style.display = tab === 'mine' ? '' : 'none';
+        renderTable();
+    }
+
+    function formatTime(seconds) {
+        if (!seconds) return '–';
+        return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+    }
+
+    function renderTable() {
+        const user      = getLoggedUser();
+        const container = document.getElementById('lb-container');
+
+        let entries = ALL_ENTRIES;
+
+        if (currentTab === 'mine') {
+            if (!user) {
+                container.innerHTML = `
+                    <div class="table-wrap">
+                        <div class="empty-state">
+                            <a href="Prihlaseni.html" style="color:var(--green-dark);font-weight:700;">Prihlaste se</a>
+                            a uvidite svoje vysledky.
+                        </div>
+                    </div>`;
+                return;
+            }
+            entries = ALL_ENTRIES.filter(e => e.name === user);
+            renderStats(entries, user);
+        }
+
+        if (entries.length === 0) {
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <div class="empty-state">
+                        ${currentTab === 'mine' ? 'Zatim zadne vysledky. Zahraj si!' : 'Zebricek je zatim prazdny.'}
+                    </div>
+                </div>`;
+            return;
+        }
+
+        const rows = entries.map((entry, i) => {
+            const rank     = i + 1;
+            const rc       = rank <= 3 ? ` class="rank-${rank}"` : '';
+            const diff     = entry.difficulty || 'Normal';
+            const cas      = formatTime(entry.time);
+            const isMine   = user && entry.name === user;
+            const rowClass = (isMine && currentTab === 'all') ? ' class="my-row"' : '';
+            const nameTag  = isMine ? ` <span style="font-size:0.75rem;color:var(--green-dark);">(ty)</span>` : '';
+
+            return `
+                <tr${rowClass}>
+                    <td${rc}>${rank}</td>
+                    <td>${esc(entry.name || '–')}${nameTag}</td>
+                    <td class="score-cell">${entry.score ?? 0}</td>
+                    <td>${cas}</td>
+                    <td><span class="badge badge-${diff}">${diff}</span></td>
+                </tr>`;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Hrac</th>
+                            <th>Skore</th>
+                            <th>Cas</th>
+                            <th>Obtiznost</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderStats(entries, user) {
+        if (entries.length === 0) {
+            ['stat-games','stat-best','stat-avg','stat-rank'].forEach(id => {
+                document.getElementById(id).textContent = '–';
+            });
+            return;
+        }
+        const scores = entries.map(e => e.score ?? 0);
+        const best   = Math.max(...scores);
+        const avg    = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+        const rank   = ALL_ENTRIES.findIndex(e => e.name === user && e.score === best) + 1;
+
+        document.getElementById('stat-games').textContent = entries.length;
+        document.getElementById('stat-best').textContent  = best;
+        document.getElementById('stat-avg').textContent   = avg;
+        document.getElementById('stat-rank').textContent  = rank > 0 ? '#' + rank : '–';
+    }
+
+    function esc(str) {
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => renderTable());
+</script>
+
+</body>
+</html>

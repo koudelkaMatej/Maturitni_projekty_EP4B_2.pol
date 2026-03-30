@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prihlaseni – Food Catcher</title>
+    <link rel="stylesheet" href="Index.css">
+</head>
+<body>
+
+<header>
+    <h1>Food Catcher</h1>
+    <div class="header-right">
+        <nav>
+            <a href="Index.html">Domu</a>
+            <a href="Zebricek.html">Zebricek</a>
+            <a href="Prihlaseni.html" class="active">Prihlaseni</a>
+        </nav>
+        <div id="header-user-slot"></div>
+    </div>
+</header>
+
+<main>
+    <div class="login-card">
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Prihlaseni</button>
+            <button class="tab-btn"        id="tab-reg"   onclick="switchTab('reg')">Registrace</button>
+        </div>
+
+        <div class="msg" id="msg"></div>
+
+        <div id="form-login">
+            <h2>Prihlaseni</h2>
+            <p>Prihlaste se a zobrazte si zebricek.</p>
+            <div class="form-group">
+                <label for="login-user">Uzivatelske jmeno</label>
+                <input type="text" id="login-user" placeholder="Vase jmeno..." autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="login-pass">Heslo</label>
+                <input type="password" id="login-pass" placeholder="Heslo" autocomplete="current-password">
+            </div>
+            <button class="btn-login" onclick="handleLogin()">Prihlasit se</button>
+            <p class="switch-link">Nemas ucet? <a onclick="switchTab('reg')">Zaregistruj se</a></p>
+        </div>
+
+        <div id="form-reg" style="display:none;">
+            <h2>Registrace</h2>
+            <p>Vytvorte si novy ucet.</p>
+            <div class="form-group">
+                <label for="reg-user">Uzivatelske jmeno</label>
+                <input type="text" id="reg-user" placeholder="Zvol si jmeno..." maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="reg-pass">Heslo</label>
+                <input type="password" id="reg-pass" placeholder="Minimalne 4 znaky">
+            </div>
+            <div class="form-group">
+                <label for="reg-pass2">Heslo znovu</label>
+                <input type="password" id="reg-pass2" placeholder="Zopakuj heslo">
+            </div>
+            <button class="btn-login" onclick="handleRegister()">Zaregistrovat se</button>
+            <p class="switch-link">Uz mas ucet? <a onclick="switchTab('login')">Prihlaste se</a></p>
+        </div>
+    </div>
+</main>
+
+<footer><p>2025 Food Catcher</p></footer>
+
+<script src="auth.js"></script>
+<script>
+    function showMsg(text, type) {
+        const el = document.getElementById('msg');
+        el.textContent = text;
+        el.className = 'msg ' + type + ' show';
+    }
+    function hideMsg() { document.getElementById('msg').className = 'msg'; }
+
+    function switchTab(tab) {
+        hideMsg();
+        document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+        document.getElementById('form-reg').style.display   = tab === 'reg'   ? '' : 'none';
+        document.getElementById('tab-login').className = 'tab-btn' + (tab === 'login' ? ' active' : '');
+        document.getElementById('tab-reg').className   = 'tab-btn' + (tab === 'reg'   ? ' active' : '');
+    }
+
+    function handleLogin() {
+        const username = document.getElementById('login-user').value.trim();
+        const password = document.getElementById('login-pass').value;
+        if (!username || !password) { showMsg('Vyplnte jmeno i heslo.', 'error'); return; }
+        const users = loadUsers();
+        if (!users[username])                            { showMsg('Uzivatel nenalezen. Zaregistrujte se nejdrive.', 'error'); return; }
+        if (users[username] !== hashPassword(password)) { showMsg('Spatne heslo.', 'error'); return; }
+        localStorage.setItem('fc_logged_user', username);
+        showMsg('Prihlaseni uspesne. Vitej, ' + username, 'success');
+        setTimeout(() => { window.location.href = 'Zebricek.html'; }, 1200);
+    }
+
+    function handleRegister() {
+        const username  = document.getElementById('reg-user').value.trim();
+        const password  = document.getElementById('reg-pass').value;
+        const password2 = document.getElementById('reg-pass2').value;
+        if (!username)              { showMsg('Zadejte uzivatelske jmeno.', 'error'); return; }
+        if (username.length < 2)    { showMsg('Jmeno musi mit alespon 2 znaky.', 'error'); return; }
+        if (password.length < 4)    { showMsg('Heslo musi mit alespon 4 znaky.', 'error'); return; }
+        if (password !== password2) { showMsg('Hesla se neshoduji.', 'error'); return; }
+        const users = loadUsers();
+        if (users[username]) { showMsg('Toto jmeno je jiz obsazeno.', 'error'); return; }
+        users[username] = hashPassword(password);
+        saveUsers(users);
+        localStorage.setItem('fc_logged_user', username);
+        showMsg('Ucet vytvoren. Vitej, ' + username, 'success');
+        setTimeout(() => { window.location.href = 'Zebricek.html'; }, 1200);
+    }
+
+    window.addEventListener('load', () => {
+        if (getLoggedUser()) window.location.href = 'Zebricek.html';
+    });
+</script>
+
+</body>
+</html>
