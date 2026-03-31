@@ -1,0 +1,16 @@
+[
+    {
+        "name": "ejdm",
+        "score": 15
+    },
+    {
+        "name": "marek",
+        "score": 8,
+        "difficulty": "normal"
+    },
+    {
+        "name": "radek",
+        "score": 2,
+        "difficulty": "normal"
+    }
+]
