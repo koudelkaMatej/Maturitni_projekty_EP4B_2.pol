@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}TOP 20 Žebříček{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="text-align: center;">TOP 20 NEJLEPŠÍCH VÝKONŮ</h1>
+    <p style="text-align: center; color: gray; margin-top: -10px; font-size: 0.85rem;">
+        (Maximálně 2 nejlepší zápisy na jednoho hráče)
+    </p>
+
+    <table>
+    <thead>
+    <tr>
+        <th class="col-rank">#</th>
+        <th class="col-player">Hráč</th>
+        <th class="col-score">Skóre</th>
+        <th class="col-level">Level</th>
+        <th class="col-date">Datum</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for r in scores %}
+        <tr class="{{ 'me-row' if r['user_id'] == session.user_id else '' }}">
+            <td style="color: var(--primary); font-weight: bold;">{{ "%02d" | format(loop.index) }}</td>
+            <td style="font-weight: bold;">{{ r['name'] }}</td>
+            <td class="score">{{ r['score'] }}</td>
+            <td><span class="lvl">Lvl {{ r['level'] }}</span></td>
+            <td style="color: rgba(255,255,255,0.3); font-size: 0.85rem;">{{ r['played_at'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    {% if not session.user_id %}
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="/login" style="color: var(--accent); text-decoration: none; font-size: 0.9rem;">
+            Chceš se taky dostat do tabulky? Přihlas se zde!
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

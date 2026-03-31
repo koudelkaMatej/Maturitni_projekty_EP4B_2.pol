@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Hlavní Menu{% endblock %}
+
+{% block content %}
+<div style="text-align: center; max-width: 900px;">
+    <h1>NEON TETRIS 2026</h1>
+    <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 40px;">
+        Ponořte se do moderní interpretace legendární arkády.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: left;">
+        <div class="container" style="padding: 25px;">
+            <h2 style="color:var(--primary); margin-top:0;">O PROJEKTU</h2>
+            <p style="color:gray; line-height:1.6;">Tato aplikace propojuje herní engine v <b>Pygame</b> s webovým rozhraním <b>Flask</b> a <b>SQLite</b> databází. Tato kombinace nám umožňuje zapisovat zobrazovat výsledky ze hry přes databázi na webové stránce.</p>
+        </div>
+
+        <div class="container" style="padding: 25px;">
+            <h2 style="color:var(--primary); margin-top:0;">OVLÁDÁNÍ</h2>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;"><span>Pohyb</span><b style="color:var(--accent)">ŠIPKY</b></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;"><span>Rotace</span><b style="color:var(--accent)">ŠIPKA NAHORU</b></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;"><span>Pád</span><b style="color:var(--accent)">ŠIPKA DOLU</b></div>
+        </div>
+    </div>
+
+    <div style="margin-top: 60px; padding-bottom: 50px;">
+        <h2 style="color:var(--primary)">Struktura Databáze (ER Diagram)</h2>
+        <div style="border: 2px solid var(--secondary); border-radius: 30px; padding: 10px; display: inline-block; margin-top: 20px;">
+            <img src="{{ url_for('static', filename='er_diagram.png') }}" alt="ER Diagram" style="max-width:600px; border-radius:20px; display:block;">
+        </div>
+    </div>
+</div>
+{% endblock %}
