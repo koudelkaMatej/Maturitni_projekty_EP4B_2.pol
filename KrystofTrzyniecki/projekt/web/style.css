@@ -1,0 +1,298 @@
+/* =========================================
+               HLAVNÍ STYLY
+========================================= */
+
+/* --- DEFINICE PROMĚNNÝCH (Barevné schéma) --- */
+:root {
+    --color-bg-main: #0d0d0d;      /* Hlavní pozadí (nejtmavší) */
+    --color-bg-secondary: #1a1a1a; /* Pozadí navigace */
+    --color-bg-tertiary: #1f1f1f;  /* Pozadí sekcí a modálů */
+    --color-bg-input: #333333;     /* Pozadí inputů */
+    
+    --color-text-main: #e0e0e0;    /* Hlavní text */
+    --color-text-muted: #666666;   /* Tlumený text (patička, zamčeno) */
+    --color-text-dark: #000000;    /* Text na světlém pozadí */
+    
+    --color-accent: #00ffcc;       /* Hlavní zvýrazňovací barva (neon) */
+    --color-danger: #ff4444;       /* Barva pro chyby nebo odhlášení */
+    
+    --border-color-soft: #333333;  /* Jemné ohraničení */
+    --border-color-accent: #00ffcc; /* Zvýrazněné ohraničení */
+    
+    --font-main: 'Segoe UI', sans-serif;
+}
+
+
+/* =========================================
+   1. ZÁKLADNÍ NASTAVENÍ
+========================================= */
+body { 
+    font-family: var(--font-main); 
+    margin: 0; 
+    background: var(--color-bg-main); 
+    color: var(--color-text-main); 
+    line-height: 1.6; 
+}
+
+
+/* =========================================
+   2. Navbar
+========================================= */
+nav { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    background: var(--color-bg-secondary); 
+    padding: 10px 40px; 
+    position: sticky; 
+    top: 0; 
+    z-index: 1000; 
+    border-bottom: 2px solid var(--border-color-soft); 
+}
+
+nav a { 
+    color: white; 
+    text-decoration: none; 
+    font-weight: bold; 
+    margin-right: 25px; 
+    transition: color 0.3s ease;
+}
+nav a:hover {
+    color: var(--color-accent);
+}
+
+/* --- Tlačítka v navigaci --- */
+.btn-nav-login { 
+    background: transparent; 
+    border: 1px solid var(--border-color-accent); 
+    color: var(--color-accent); 
+    padding: 8px 20px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    transition: all 0.3s ease;
+}
+.btn-nav-login:hover {
+    background: rgba(0, 255, 204, 0.1);
+}
+
+.btn-nav-reg { 
+    background: var(--color-accent); 
+    border: 1px solid var(--border-color-accent); 
+    color: var(--color-text-dark); 
+    padding: 8px 20px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    margin-left: 10px; 
+    transition: opacity 0.3s ease;
+}
+.btn-nav-reg:hover {
+    opacity: 0.9;
+}
+
+.btn-logout { 
+    background: var(--color-danger); 
+    color: white; 
+    border: none; 
+    padding: 8px 15px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    text-decoration: none; 
+    font-size: 0.9rem; 
+}
+.btn-logout:hover {
+    background: #d63030;
+}
+
+
+/* =========================================
+   3. MODÁLNÍ OKNA
+========================================= */
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0, 0, 0, 0.9); 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 2000; 
+}
+
+.modal-content { 
+    background: var(--color-bg-tertiary); 
+    padding: 2.5rem; 
+    border-radius: 15px; 
+    width: 350px; 
+    position: relative; 
+    border: 1px solid var(--border-color-accent); 
+    text-align: center; 
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); /* Jemná záře */
+}
+
+.close-btn { 
+    position: absolute; 
+    top: 10px; 
+    right: 20px; 
+    font-size: 2rem; 
+    color: #777; 
+    cursor: pointer; 
+    transition: color 0.3s;
+}
+.close-btn:hover {
+    color: white;
+}
+
+
+/* =========================================
+   4. HLAVNÍ STRUKTURA A SEKCE
+========================================= */
+header { 
+    text-align: center; 
+    padding: 4rem 1rem; 
+    color: var(--color-accent); 
+    background: #000; 
+    letter-spacing: 5px; 
+}
+
+main { 
+    max-width: 900px; 
+    margin: 30px auto; 
+    padding: 0 20px; 
+}
+
+section { 
+    background: var(--color-bg-tertiary); 
+    padding: 2.5rem; 
+    margin-bottom: 2rem; 
+    border-radius: 12px; 
+    border: 1px solid var(--border-color-soft);
+}
+
+/* Nadpisy*/
+section h2 { 
+    text-align: center; 
+    color: var(--color-accent); 
+    text-transform: uppercase; 
+    letter-spacing: 3px; 
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+}
+
+
+/* =========================================
+   5. INFORMAČNÍ BOXY
+========================================= */
+.info-grid { 
+    display: flex; 
+    gap: 20px; 
+}
+
+.info-box { 
+    flex: 1; 
+    background: #111; 
+    padding: 1.5rem; 
+    border-radius: 8px; 
+    border-top: 3px solid var(--color-accent); 
+}
+
+.info-box h3 {
+    color: var(--color-accent);
+    margin-top: 0;
+}
+
+.info-box ul {
+    list-style-position: inside;
+    padding-left: 0;
+}
+
+
+/* =========================================
+   6. Scoreboard
+========================================= */
+.table-wrapper {
+    overflow-x: auto; 
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+table th { 
+    text-align: left; 
+    color: var(--color-accent); 
+    padding: 12px; 
+    border-bottom: 2px solid var(--border-color-soft); 
+}
+
+table td { 
+    padding: 12px; 
+    border-bottom: 1px solid #222; 
+}
+
+
+/* =========================================
+   7. FORMULÁŘE A TLAČÍTKA
+========================================= */
+input { 
+    width: 100%; 
+    padding: 12px; 
+    margin: 10px 0; 
+    background: var(--color-bg-input); 
+    border: 1px solid #555; 
+    color: white; 
+    border-radius: 4px; 
+    box-sizing: border-box; 
+}
+input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.btn-primary { 
+    width: 100%; 
+    padding: 12px; 
+    background: var(--color-accent); 
+    border: none; 
+    font-weight: bold; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    color: var(--color-text-dark); 
+    margin-top: 10px; 
+    transition: opacity 0.3s;
+}
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+
+/* =========================================
+   8. PATIČKA A POMOCNÉ TŘÍDY
+========================================= */
+footer { 
+    text-align: center; 
+    padding: 2rem; 
+    color: var(--color-text-muted); 
+    font-size: 0.9rem; 
+    border-top: 1px solid var(--border-color-soft);
+}
+
+/* Skrytí elementů (pro JS modály) */
+.hidden { 
+    display: none !important; 
+}
+
+/* Styl pro zamčenou sekci (nepřihlášený uživatel) */
+.locked { 
+    text-align: center; 
+    color: var(--color-text-muted); 
+    font-style: italic; 
+    border: 1px dashed var(--border-color-soft); 
+    padding: 30px; 
+    border-radius: 8px;
+}
