@@ -1,1 +1,0 @@
-# Flappy Bird – Playable\n\nInstalace: `pip install -r requirements.txt`\n\nSpuštění: `python main.py`\n
