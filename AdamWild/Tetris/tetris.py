@@ -137,19 +137,25 @@ def nacti_registrovane_uzivatele():
 def ask_name(screen, width, height):
     """Zobrazí obrazovku pro zadání jména hráče.
     Ověří jméno oproti prihlaseni.json - pokud uživatel neexistuje, zobrazí chybu.
-    Vrátí zadané jméno jako řetězec."""
+    Vrátí zadané jméno jako řetězec, nebo None pokud hráč zvolil Zpět do menu."""
     font_size  = max(20, min(36, width // 12))
     font       = pygame.font.SysFont("arial", font_size)
     small_font = pygame.font.SysFont("arial", max(14, font_size // 2))
     name       = ""
     chyba      = ""          # Chybová zpráva - prázdná = žádná chyba
     input_active = True
+    go_to_menu = False       # Příznak - True = hráč chce zpět do menu
     clock = pygame.time.Clock()
 
     # Načteme registrované uživatele jednou před smyčkou
     registrovani = nacti_registrovane_uzivatele()
     # Pokud je soubor prázdný nebo neexistuje, kontrolu vypneme
     kontrola_aktivni = len(registrovani) > 0
+
+    # Rozměry a pozice tlačítka "Zpět do menu"
+    btn_w, btn_h = 200, 45
+    btn_x = width // 2 - btn_w // 2
+    btn_y = height // 2 + 140
 
     while input_active:
         screen.fill(MENU_BG)
@@ -179,6 +185,15 @@ def ask_name(screen, width, height):
             info_rect = info.get_rect(center=(width // 2, height // 2 + 95))
             screen.blit(info_surf := info, info_rect)
 
+        # Tlačítko "Zpět do menu" - vždy viditelné
+        mouse_pos = pygame.mouse.get_pos()
+        btn_hovered = btn_x <= mouse_pos[0] <= btn_x + btn_w and btn_y <= mouse_pos[1] <= btn_y + btn_h
+        btn_color = BUTTON_HOVER if btn_hovered else BUTTON_COLOR
+        pygame.draw.rect(screen, btn_color, (btn_x, btn_y, btn_w, btn_h), border_radius=8)
+        btn_label = small_font.render("Zpet do menu", True, WHITE)
+        btn_label_rect = btn_label.get_rect(center=(btn_x + btn_w // 2, btn_y + btn_h // 2))
+        screen.blit(btn_label, btn_label_rect)
+
         pygame.display.update()
 
         for event in pygame.event.get():
@@ -186,7 +201,11 @@ def ask_name(screen, width, height):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN and name.strip():
+                if event.key == pygame.K_ESCAPE:
+                    # Escape = rychlý návrat do menu
+                    go_to_menu = True
+                    input_active = False
+                elif event.key == pygame.K_RETURN and name.strip():
                     # Ověření jména oproti databázi registrovaných uživatelů
                     if kontrola_aktivni and name.lower() not in registrovani:
                         # Uživatel nenalezen - zobrazíme chybu, NEUKONČÍME smyčku
@@ -201,9 +220,16 @@ def ask_name(screen, width, height):
                 elif len(name) < 16 and (event.unicode.isalnum() or event.unicode == "_"):
                     name  += event.unicode
                     chyba = ""       # Psaní = vyčistit chybovou zprávu
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if btn_x <= event.pos[0] <= btn_x + btn_w and btn_y <= event.pos[1] <= btn_y + btn_h:
+                    # Klik na tlačítko "Zpět do menu"
+                    go_to_menu = True
+                    input_active = False
 
         clock.tick(60)
 
+    if go_to_menu:
+        return None  # None = hráč se vrátil do menu bez uložení
     return name  # Vrátí ověřené jméno volající funkci (game_over_save)
 
 
@@ -623,8 +649,13 @@ def play_game(screen, width, height, fullscreen=False, hard_mode=False):
     paused     = False  # Příznak pauzy: True = hra je pozastavena, False = hra běží
 
     def game_over_save():
-        """Vnitřní funkce volaná při prohře: zobrazí zadání jména a uloží skóre."""
-        name = ask_name(screen, width, height)  # Zobrazí obrazovku pro zadání jména, vrátí jméno
+        """Vnitřní funkce volaná při prohře: zobrazí zadání jména a uloží skóre.
+        Pokud hráč klikne 'Zpět do menu', vrátí False. Jinak uloží skóre a vrátí True."""
+        name = ask_name(screen, width, height)  # Zobrazí obrazovku pro zadání jména, vrátí jméno nebo None
+
+        if name is None:
+            return False  # Hráč zvolil Zpět do menu - nic neukládáme
+
         highscores = load_highscores()          # Znovu načte aktuální highscores ze souboru
 
         # Uloží poslední skóre pod speciálním klíčem - přepíše předchozí hodnotu
@@ -637,6 +668,7 @@ def play_game(screen, width, height, fullscreen=False, hard_mode=False):
             highscores[name] = score
 
         save_highscores(highscores)             # Zapíše aktualizovaný slovník do souboru JSON
+        return True
 
     # -----------------------------------------------
     # HLAVNÍ HERNÍ SMYČKA - opakuje se každý snímek
