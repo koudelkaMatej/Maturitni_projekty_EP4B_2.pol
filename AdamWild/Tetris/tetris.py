@@ -149,8 +149,12 @@ def ask_name(screen, width, height):
 
     # Načteme registrované uživatele jednou před smyčkou
     registrovani = nacti_registrovane_uzivatele()
-    # Pokud je soubor prázdný nebo neexistuje, kontrolu vypneme
-    kontrola_aktivni = len(registrovani) > 0
+    # Zkontrolujeme zda soubor prihlaseni.json vůbec existuje
+    prihlaseni_soubor = os.path.join(os.path.dirname(sys.argv[0]), "prihlaseni.json")
+    soubor_existuje = os.path.exists(prihlaseni_soubor)
+    # Kontrola je vždy aktivní pokud soubor existuje (i když je prázdný)
+    # Pokud soubor neexistuje vůbec, kontrolu vypneme (volný režim)
+    kontrola_aktivni = soubor_existuje
 
     # Rozměry a pozice tlačítka "Zpět do menu"
     btn_w, btn_h = 220, 50
@@ -208,9 +212,13 @@ def ask_name(screen, width, height):
                     input_active = False
                 elif event.key == pygame.K_RETURN and name.strip():
                     # Ověření jména oproti databázi registrovaných uživatelů
-                    if kontrola_aktivni and name.lower() not in registrovani:
+                    if kontrola_aktivni and len(registrovani) == 0:
+                        # Soubor existuje ale je prázdný - nikdo není registrován
+                        chyba = "Zadny uzivatel neni registrovan!"
+                        name  = ""
+                    elif kontrola_aktivni and name.lower() not in registrovani:
                         # Uživatel nenalezen - zobrazíme chybu, NEUKONČÍME smyčku
-                        chyba = f"Uzivatel '{name}' nenalezen! Zkus znovu."
+                        chyba = f"Uzivatel '{name}' neni registrovan!"
                         name  = ""   # Vymažeme pole pro nové zadání
                     else:
                         # Jméno je v pořádku (buď existuje v databázi, nebo kontrola je vypnutá)
