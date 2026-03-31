@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER Diagram – Food Catcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 30px 20px;
+            color: #1e1e1e;
+        }
+        h1 {
+            font-size: 1.6rem;
+            color: #2a8a30;
+            margin-bottom: 6px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+        #erd-container {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            max-width: 860px;
+        }
+        #erd svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .legenda {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .legenda h3 {
+            font-size: 0.95rem;
+            color: #444;
+            margin-bottom: 12px;
+        }
+        .legenda-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .legenda-item {
+            font-size: 0.88rem;
+            color: #666;
+        }
+        .legenda-item code {
+            background: #f0f0f0;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<h1>ER Diagram – Food Catcher</h1>
+<p>Znazorneni datovych entit a jejich vztahu v projektu.</p>
+
+<div id="erd-container">
+    <div id="erd"></div>
+
+    <div class="legenda">
+        <h3>Legenda entit</h3>
+        <div class="legenda-row">
+            <div class="legenda-item"><code>LEADERBOARD_JSON</code> – soubor na disku (web/leaderboard.json) – uklada vysledky her</div>
+            <div class="legenda-item"><code>LOCALSTORAGE_USERS</code> – ulozeno v prohlizeci – ucty hracu (jmeno + hash hesla)</div>
+            <div class="legenda-item"><code>LOCALSTORAGE_SESSION</code> – ulozeno v prohlizeci – kdo je prave prihlasen</div>
+            <div class="legenda-item"><code>GAME_SESSION</code> – docasna data jedne hry v pameti – po game over se ulozi do JSON</div>
+        </div>
+        <br>
+        <h3>Legenda vztahu</h3>
+        <div class="legenda-row">
+            <div class="legenda-item"><code>||--||</code> prave jeden k jednomu</div>
+            <div class="legenda-item"><code>||--o{</code> jeden k nula nebo vice</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        fontFamily: 'Arial, sans-serif',
+        themeVariables: {
+            fontSize: '14px',
+            fontFamily: 'Arial, sans-serif',
+            lineColor: '#73726c',
+            textColor: '#1e1e1e',
+            primaryColor: '#eafaea',
+            primaryBorderColor: '#3cb043',
+            primaryTextColor: '#1e1e1e',
+            attributeBackgroundColorEven: '#f9f9f9',
+            attributeBackgroundColorOdd: '#ffffff',
+        },
+    });
+
+    const diagram = `erDiagram
+  LEADERBOARD_JSON {
+    string name PK
+    int score
+    string difficulty
+    int time
+  }
+
+  LOCALSTORAGE_USERS {
+    string username PK
+    string password_hash
+  }
+
+  LOCALSTORAGE_SESSION {
+    string fc_logged_user FK
+  }
+
+  GAME_SESSION {
+    string player_name
+    int final_score
+    string difficulty
+    int elapsed_seconds
+  }
+
+  LOCALSTORAGE_USERS ||--o{ LOCALSTORAGE_SESSION : "prihlasi"
+  LOCALSTORAGE_SESSION ||--o{ GAME_SESSION : "identifikuje hrace"
+  GAME_SESSION ||--|| LEADERBOARD_JSON : "ulozi po game over"
+`;
+
+    const { svg } = await mermaid.render('erd-svg', diagram);
+    document.getElementById('erd').innerHTML = svg;
+
+    // Zaobleni rohu entit
+    document.querySelectorAll('#erd svg .node').forEach(node => {
+        const firstPath = node.querySelector('path[d]');
+        if (!firstPath) return;
+        const d = firstPath.getAttribute('d');
+        const nums = d.match(/-?[\d.]+/g)?.map(Number);
+        if (!nums || nums.length < 8) return;
+        const xs = [nums[0], nums[2], nums[4], nums[6]];
+        const ys = [nums[1], nums[3], nums[5], nums[7]];
+        const x = Math.min(...xs), y = Math.min(...ys);
+        const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x); rect.setAttribute('y', y);
+        rect.setAttribute('width', w); rect.setAttribute('height', h);
+        rect.setAttribute('rx', '8');
+        for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+            if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+        }
+        firstPath.replaceWith(rect);
+    });
+
+    // Odstraneni ramecku z radku atributu
+    document.querySelectorAll('#erd svg .row-rect-odd path, #erd svg .row-rect-even path').forEach(p => {
+        p.setAttribute('stroke', 'none');
+    });
+</script>
+
+</body>
+</html>
