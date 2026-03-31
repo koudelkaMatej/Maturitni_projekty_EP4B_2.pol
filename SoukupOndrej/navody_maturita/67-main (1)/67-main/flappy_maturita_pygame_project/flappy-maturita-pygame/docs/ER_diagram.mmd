@@ -1,0 +1,14 @@
+erDiagram
+    PLAYERS ||--o{ SCORES : has
+    PLAYERS {
+        int id PK
+        string name
+        string created_at
+    }
+    SCORES {
+        int id PK
+        int player_id FK
+        string difficulty
+        int score
+        string created_at
+    }
