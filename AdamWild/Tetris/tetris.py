@@ -153,9 +153,9 @@ def ask_name(screen, width, height):
     kontrola_aktivni = len(registrovani) > 0
 
     # Rozměry a pozice tlačítka "Zpět do menu"
-    btn_w, btn_h = 200, 45
+    btn_w, btn_h = 220, 50
     btn_x = width // 2 - btn_w // 2
-    btn_y = height // 2 + 140
+    btn_y = min(height // 2 + 130, height - 80)  # Nikdy nepřekročí spodní okraj okna
 
     while input_active:
         screen.fill(MENU_BG)
@@ -185,12 +185,13 @@ def ask_name(screen, width, height):
             info_rect = info.get_rect(center=(width // 2, height // 2 + 95))
             screen.blit(info_surf := info, info_rect)
 
-        # Tlačítko "Zpět do menu" - vždy viditelné
+        # Tlačítko "Zpět do menu" - zvýrazněné zelenou barvou, vždy viditelné
         mouse_pos = pygame.mouse.get_pos()
         btn_hovered = btn_x <= mouse_pos[0] <= btn_x + btn_w and btn_y <= mouse_pos[1] <= btn_y + btn_h
-        btn_color = BUTTON_HOVER if btn_hovered else BUTTON_COLOR
+        btn_color = (60, 160, 60) if btn_hovered else (40, 120, 40)
         pygame.draw.rect(screen, btn_color, (btn_x, btn_y, btn_w, btn_h), border_radius=8)
-        btn_label = small_font.render("Zpet do menu", True, WHITE)
+        pygame.draw.rect(screen, (80, 200, 80), (btn_x, btn_y, btn_w, btn_h), 2, border_radius=8)
+        btn_label = small_font.render("< Zpet do menu", True, WHITE)
         btn_label_rect = btn_label.get_rect(center=(btn_x + btn_w // 2, btn_y + btn_h // 2))
         screen.blit(btn_label, btn_label_rect)
 
@@ -1051,6 +1052,12 @@ def main_menu():
         if state == "play":         # Pokud byl vybrán herní stav
             play_game(screen, width, height, fullscreen, hard_mode)  # Spustí celou hru (blokující volání)
             state = "menu"          # Po návratu z hry se automaticky vrátí do menu
+            # Vyčistíme event frontu a počkáme na uvolnění myši -
+            # zabrání tomu aby klik z "Zpět do menu" okamžitě spustil tlačítko v hlavním menu
+            pygame.event.clear()
+            while pygame.mouse.get_pressed()[0]:
+                pygame.event.pump()
+                pygame.time.wait(10)
 
     pygame.quit()   # Ukončí pygame - uvolní paměť, zavře okno, ukončí audio
 
