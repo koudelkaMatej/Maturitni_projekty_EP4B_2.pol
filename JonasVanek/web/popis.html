@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Dokumentace – Flappy Palach</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Rozšíření stylů pro dokumentační stránku */
+        .doc-section {
+            background: var(--white);
+            border: 6px solid var(--black);
+            border-radius: 16px;
+            padding: 32px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 6px 0 var(--shadow);
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .doc-card {
+            background: linear-gradient(180deg, #fffef7, #f5f4e8);
+            border: 4px solid var(--black);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 0 var(--shadow);
+        }
+
+        .doc-card h4 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85em;
+            color: var(--pipe-dark);
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+        }
+
+        .doc-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .doc-card li {
+            font-size: 1.2em;
+            padding: 6px 0 6px 24px;
+            position: relative;
+        }
+
+        .doc-card li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: var(--pipe-green);
+            font-size: 0.8em;
+        }
+
+        .er-diagram-wrapper {
+            background: #f8f9fa;
+            border: 4px solid var(--black);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .er-diagram-wrapper img {
+            max-width: 100%;
+            height: auto;
+            border: 3px solid var(--black);
+            border-radius: 8px;
+            box-shadow: 0 4px 0 var(--shadow);
+        }
+
+        .feature-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 4px;
+            background: var(--pipe-green);
+            color: var(--white);
+            border: 3px solid var(--black);
+            border-radius: 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6em;
+            box-shadow: 0 2px 0 var(--shadow);
+        }
+
+        .feature-badge--security { background: #e74c3c; }
+        .feature-badge--frontend { background: #3498db; }
+        .feature-badge--backend { background: #f39c12; }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 16px;
+            border: 3px solid var(--black);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--pipe-green), var(--pipe-dark));
+            border: 4px solid var(--black);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+            color: var(--white);
+        }
+
+        .highlight-box h3 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1em;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 0 var(--shadow);
+        }
+
+        .highlight-box p {
+            font-size: 1.3em;
+            line-height: 1.6;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .tech-item {
+            background: var(--white);
+            border: 3px solid var(--black);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65em;
+            box-shadow: 0 3px 0 var(--shadow);
+        }
+
+        @media (max-width: 768px) {
+            .doc-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    
+    <!-- ZPĚT NA HLAVNÍ STRÁNKU -->
+    <div class="back-btn">
+        <a href="index.html" style="text-decoration: none;">
+            <button class="game-btn">
+                <span class="btn-icon">◀</span>
+                ZPĚT NA ŽEBŘÍČEK
+            </button>
+        </a>
+    </div>
+
+    <!-- HLAVIČKA -->
+    <header class="game-header">
+        <div class="clouds"></div>
+        <div class="header-content">
+            <div class="bird-logo bounce">📚</div>
+            <h1 class="game-title">DOKUMENTACE</h1>
+            <p class="game-subtitle">/// MATURITNÍ PROJEKT ///</p>
+        </div>
+    </header>
+
+    <!-- ÚVOD -->
+    <section class="doc-section">
+        <h2 class="section-title">
+            <span class="pixel-icon">🎯</span>
+            CÍL PROJEKTU
+        </h2>
+        <div class="highlight-box">
+            <h3>FULL-STACK APLIKACE S AUTENTIZACÍ</h3>
+            <p>
+                Flappy Palach je komplexní demonstrace moderních webových technologií 
+                spojených s desktopovou aplikací. Projekt zahrnuje klientskou hru v Pythonu, 
+                RESTful API backend v PHP, relační databázi MySQL a responzivní frontend 
+                s autentizačním systémem.
+            </p>
+        </div>
+
+        <div class="doc-grid">
+            <div class="doc-card">
+                <h4>🎮 DESKTOPOVÁ HRA</h4>
+                <ul>
+                    <li>Python 3.x + Pygame</li>
+                    <li>Fyzikální engine (gravitace, kolize)</li>
+                    <li>3 úrovně obtížnosti</li>
+                    <li>Login/Register integrace</li>
+                    <li>Real-time API komunikace</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>🌐 WEBOVÝ FRONTEND</h4>
+                <ul>
+                    <li>Vanilla JavaScript (ES6+)</li>
+                    <li>Responzivní CSS Grid/Flexbox</li>
+                    <li>Session management</li>
+                    <li>AJAX komunikace s API</li>
+                    <li>Pixel-art retro design</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>⚙️ PHP BACKEND</h4>
+                <ul>
+                    <li>6 REST API endpointů</li>
+                    <li>Prepared statements (SQL injection prevence)</li>
+                    <li>Password hashing (bcrypt)</li>
+                    <li>JSON response format</li>
+                    <li>Error handling & validace</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>💾 DATABÁZE</h4>
+                <ul>
+                    <li>MySQL relační model</li>
+                    <li>Foreign key constraints</li>
+                    <li>Indexy pro performance</li>
+                    <li>ENUM typy pro obtížnost</li>
+                    <li>Normalizace (3NF)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ER DIAGRAM -->
+    <section class="doc-section">
+        <h2 class="section-title">
+            <span class="pixel-icon">📊</span>
+            DATABÁZOVÝ MODEL (ER DIAGRAM)
+        </h2>
+        
+        <div class="er-diagram-wrapper">
+            <img src="er.png" alt="ER Diagram databáze Flappy Palach">
+        </div>
+
+        <div class="doc-grid">
+            <div class="doc-card">
+                <h4>TABULKA USERS</h4>
+                <ul>
+                    <li><strong>id</strong> – primární klíč (AUTO_INCREMENT)</li>
+                    <li><strong>username</strong> – unikátní jméno (UNIQUE constraint)</li>
+                    <li><strong>password_hash</strong> – bcrypt hash hesla</li>
+                    <li><strong>date_registered</strong> – timestamp registrace</li>
+                    <li><strong>last_login</strong> – poslední přihlášení</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>TABULKA SCORES</h4>
+                <ul>
+                    <li><strong>id</strong> – primární klíč</li>
+                    <li><strong>user_id</strong> – cizí klíč na users (CASCADE DELETE)</li>
+                    <li><strong>username</strong> – denormalizace pro rychlost</li>
+                    <li><strong>score</strong> – dosažené body</li>
+                    <li><strong>difficulty</strong> – ENUM('lehka','stredni','tezka')</li>
+                    <li><strong>date_created</strong> – timestamp pokusu</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <h3>BEST-SCORE LOGIKA</h3>
+            <p>
+                Systém ukládá pouze <strong>nejlepší skóre</strong> pro každého uživatele 
+                na každé obtížnosti. Při nové hře server porovná skóre s existujícím rekordem – 
+                pokud je nové skóre vyšší, starý záznam se smaže a uloží se nový. Tím je 
+                zajištěno, že žebříček zobrazuje skutečné TOP výkony bez duplicit.
+            </p>
+        </div>
+    </section>
+
+    <!-- TECHNOLOGIE -->
+    <section class="doc-section">
+        <h2 class="section-title">
+            <span class="pixel-icon">🔧</span>
+            POUŽITÉ TECHNOLOGIE
+        </h2>
+
+        <h3 style="font-family: 'Press Start 2P', monospace; font-size: 0.9em; margin: 20px 0 14px; color: var(--pipe-dark);">
+            FRONTEND STACK
+        </h3>
+        <div class="tech-stack">
+            <span class="tech-item">HTML5</span>
+            <span class="tech-item">CSS3 (Grid, Flexbox)</span>
+            <span class="tech-item">JavaScript ES6+</span>
+            <span class="tech-item">Google Fonts (Press Start 2P, VT323)</span>
+            <span class="tech-item">Fetch API</span>
+        </div>
+
+        <h3 style="font-family: 'Press Start 2P', monospace; font-size: 0.9em; margin: 24px 0 14px; color: var(--pipe-dark);">
+            BACKEND STACK
+        </h3>
+        <div class="tech-stack">
+            <span class="tech-item">PHP 8.x</span>
+            <span class="tech-item">MySQL 8.x</span>
+            <span class="tech-item">Apache (XAMPP)</span>
+            <span class="tech-item">PDO/MySQLi</span>
+            <span class="tech-item">JSON REST API</span>
+        </div>
+
+        <h3 style="font-family: 'Press Start 2P', monospace; font-size: 0.9em; margin: 24px 0 14px; color: var(--pipe-dark);">
+            GAME STACK
+        </h3>
+        <div class="tech-stack">
+            <span class="tech-item">Python 3.10+</span>
+            <span class="tech-item">Pygame 2.x</span>
+            <span class="tech-item">urllib (HTTP client)</span>
+            <span class="tech-item">JSON encoding</span>
+        </div>
+    </section>
+
+    <!-- KLÍČOVÉ FUNKCE -->
+    <section class="doc-section">
+        <h2 class="section-title">
+            <span class="pixel-icon">⚡</span>
+            KLÍČOVÉ FUNKCE
+        </h2>
+
+        <div class="doc-grid">
+            <div class="doc-card">
+                <h4>🔐 ZABEZPEČENÍ</h4>
+                <ul>
+                    <li>Password hashing (bcrypt, cost 10)</li>
+                    <li>SQL injection prevence (prepared statements)</li>
+                    <li>XSS protection (escapeHtml funkce)</li>
+                    <li>Input validace na serveru i klientu</li>
+                    <li>Foreign key cascade constraints</li>
+                </ul>
+                <div style="margin-top: 12px;">
+                    <span class="feature-badge feature-badge--security">SECURITY</span>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h4>👥 UŽIVATELSKÉ ÚČTY</h4>
+                <ul>
+                    <li>Registrace s validací unikátnosti</li>
+                    <li>Login systém s session managementem</li>
+                    <li>Změna jména s kontrolou dostupnosti</li>
+                    <li>Osobní profil s historií pokusů</li>
+                    <li>Best-score tracking per difficulty</li>
+                </ul>
+                <div style="margin-top: 12px;">
+                    <span class="feature-badge feature-badge--frontend">FRONTEND</span>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h4>📈 ŽEBŘÍČEK & FILTRY</h4>
+                <ul>
+                    <li>Real-time vyhledávání podle jména</li>
+                    <li>Filtrace podle obtížnosti</li>
+                    <li>Stránkování (50 záznamů/stránka)</li>
+                    <li>Top 3 vizuální zvýraznění</li>
+                    <li>Statistiky (hráči, hry, top skóre)</li>
+                </ul>
+                <div style="margin-top: 12px;">
+                    <span class="feature-badge feature-badge--frontend">FRONTEND</span>
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <h4>🎯 API ENDPOINTY</h4>
+                <ul>
+                    <li>POST /login.php</li>
+                    <li>POST /register.php</li>
+                    <li>POST /submit_score.php</li>
+                    <li>POST /change_username.php</li>
+                    <li>GET /get_scores.php</li>
+                    <li>GET /get_user_scores.php</li>
+                </ul>
+                <div style="margin-top: 12px;">
+                    <span class="feature-badge feature-badge--backend">BACKEND</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- PATIČKA -->
+    <footer class="game-footer">
+        <p>© 2025 FLAPPY PALACH • MATURITNÍ PROJEKT</p>
+        <p class="footer-note">
+            <a href="doc.html" style="color: var(--pipe-dark); text-decoration: none; font-weight: bold; font-family: 'Press Start 2P', monospace; font-size: 0.85em;">
+                📋 PRAKTICKÉ NÁVODY (onboarding • uživatelská příručka • prezentace)
+            </a>
+        </p>
+    </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentace a návody – Flappy Palach</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .doc-section {
+            background: var(--white);
+            border: 6px solid var(--black);
+            border-radius: 16px;
+            padding: 32px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 6px 0 var(--shadow);
+        }
+
+        .doc-section h3 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.9em;
+            color: var(--pipe-dark);
+            margin: 24px 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 3px dashed #ddd;
+        }
+
+        .doc-section h4 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.75em;
+            color: #555;
+            margin: 20px 0 12px;
+        }
+
+        .doc-section p {
+            font-size: 1.2em;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .doc-section ul, .doc-section ol {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .doc-section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--pipe-green), var(--pipe-dark));
+            border: 4px solid var(--black);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            color: var(--white);
+        }
+
+        .highlight-box h4 {
+            color: var(--white);
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 4px solid #856404;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            color: #856404;
+        }
+
+        .code-inline {
+            background: #f4f4f4;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+
+        .step-box {
+            background: linear-gradient(180deg, #fffef7, #f5f4e8);
+            border: 4px solid var(--black);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-left: 8px solid var(--pipe-green);
+        }
+
+        .step-box strong {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7em;
+            color: var(--pipe-dark);
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .doc-section { padding: 24px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    
+    <!-- ZPĚT -->
+    <div class="back-btn">
+        <a href="popis.html" style="text-decoration: none;">
+            <button class="game-btn">
+                <span class="btn-icon">◀</span>
+                ZPĚT NA DOKUMENTACI
+            </button>
+        </a>
+    </div>
+
+    <!-- HLAVIČKA -->
+    <header class="game-header">
+        <div class="clouds"></div>
+        <div class="header-content">
+            <div class="bird-logo bounce">📋</div>
+            <h1 class="game-title">PRAKTICKÉ NÁVODY</h1>
+            <p class="game-subtitle">/// ONBOARDING • UŽIVATELSKÁ PŘÍRUČKA • PREZENTACE ///</p>
+        </div>
+    </header>
+
+    <!-- ========== OBSAH ========== -->
+    <section class="doc-section">
+        <h2 class="section-title">OBSAH DOKUMENTU</h2>
+        <ol style="font-size: 1.3em; line-height: 2;">
+            <li><a href="#onboarding" style="color: var(--pipe-dark); text-decoration: none; font-weight: bold;">Onboarding pro nového vývojáře</a></li>
+            <li><a href="#manual" style="color: var(--pipe-dark); text-decoration: none; font-weight: bold;">Uživatelská příručka</a></li>
+            <li><a href="#presentation" style="color: var(--pipe-dark); text-decoration: none; font-weight: bold;">Obsah prezentace pro investora</a></li>
+        </ol>
+    </section>
+
+    <!-- ========== 1. ONBOARDING ========== -->
+    <section class="doc-section" id="onboarding">
+        <h2 class="section-title">1. ONBOARDING PRO NOVÉHO VÝVOJÁŘE</h2>
+        
+        <p>Tento dokument slouží pro rychlé zapracování nového člena týmu do projektu Flappy Palach. Předpokládá se základní znalost Python, PHP a MySQL.</p>
+
+        <h3>Začínáme</h3>
+
+        <h4>Požadavky</h4>
+        <ul>
+            <li>Python 3.10 nebo novější</li>
+            <li>XAMPP (Apache + MySQL)</li>
+            <li>Textový editor (VS Code, PyCharm, Sublime Text)</li>
+            <li>Git (pro verzování kódu)</li>
+        </ul>
+
+        <h4>Instalace projektu</h4>
+
+        <div class="step-box">
+            <strong>KROK 1:</strong> Stažení projektu
+            <p>Zkopíruj celou složku projektu do svého pracovního adresáře. Struktura by měla vypadat:</p>
+            <pre style="background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto;">
+flappy_palach/
+├── flappy_palach_commented.py
+├── img/
+│   ├── bird1.png
+│   ├── bird2.png
+│   ├── palachvez.png
+│   └── pozadi.png
+├── config.php
+├── login.php
+├── register.php
+├── submit_score.php
+├── get_scores.php
+├── get_user_scores.php
+├── change_username.php
+├── database.sql
+├── index.html
+├── style.css
+└── script.js</pre>
+        </div>
+
+        <div class="step-box">
+            <strong>KROK 2:</strong> Nastavení databáze
+            <ol>
+                <li>Spusť XAMPP Control Panel</li>
+                <li>Klikni Start u Apache a MySQL</li>
+                <li>Otevři prohlížeč a jdi na <span class="code-inline">http://localhost/phpmyadmin</span></li>
+                <li>Vytvoř novou databázi s názvem <span class="code-inline">flappy_palach</span></li>
+                <li>Otevři soubor <span class="code-inline">database.sql</span> a zkopíruj jeho obsah</li>
+                <li>V phpMyAdmin klikni na záložku SQL a vlož zkopírovaný kód</li>
+                <li>Klikni Provést</li>
+            </ol>
+        </div>
+
+        <div class="step-box">
+            <strong>KROK 3:</strong> Umístění webových souborů
+            <p>Zkopíruj všechny PHP, HTML, CSS a JS soubory do:</p>
+            <ul>
+                <li>Windows: <span class="code-inline">C:\xampp\htdocs\flappy_palach\</span></li>
+                <li>Mac: <span class="code-inline">/Applications/XAMPP/htdocs/flappy_palach/</span></li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <strong>KROK 4:</strong> Instalace Python závislostí
+            <pre style="background: #2c3e50; color: #ecf0f1; padding: 12px; border-radius: 6px;">pip install pygame</pre>
+        </div>
+
+        <div class="step-box">
+            <strong>KROK 5:</strong> Test instalace
+            <ol>
+                <li>Otevři prohlížeč na <span class="code-inline">http://localhost/flappy_palach/</span></li>
+                <li>Měla by se zobrazit hlavní stránka s přihlašovacím dialogem</li>
+                <li>Spusť Python hru: <span class="code-inline">python flappy_palach_commented.py</span></li>
+            </ol>
+        </div>
+
+        <h3>Architektura projektu</h3>
+
+        <h4>Základní komponenty</h4>
+        <p><strong>Python hra (flappy_palach_commented.py):</strong> Klientská desktopová aplikace. Komunikuje s PHP backendem přes HTTP požadavky.</p>
+        
+        <p><strong>PHP backend (6 souborů):</strong> REST API které zpracovává login, registraci a ukládání skóre. Každý endpoint vrací JSON odpověď.</p>
+        
+        <p><strong>MySQL databáze:</strong> Dvě tabulky (users, scores) propojené foreign key.</p>
+        
+        <p><strong>Web frontend (HTML/CSS/JS):</strong> Žebříček s přihlášením, filtry a osobním profilem.</p>
+
+        <h4>Datový tok</h4>
+        <pre style="background: #f4f4f4; padding: 16px; border-radius: 6px; overflow-x: auto;">
+1. Uživatel spustí Python hru
+2. Zadá přihlašovací údaje
+3. Python pošle POST na login.php
+4. PHP ověří heslo v databázi (password_verify)
+5. PHP vrátí JSON s user_id
+6. Uživatel hraje
+7. Po smrti ptáčka se odešle skóre na submit_score.php
+8. PHP zkontroluje best-score logiku
+9. PHP smaže starý záznam (pokud nový je lepší)
+10. PHP vloží nový záznam
+11. Web žebříček načte data z get_scores.php</pre>
+
+        <h3>Kde najdu co</h3>
+
+        <h4>Herní logika</h4>
+        <ul>
+            <li><strong>Kolizní detekce:</strong> funkce <span class="code-inline">check_collision()</span> na řádku ~857</li>
+            <li><strong>Fyzika ptáčka:</strong> funkce <span class="code-inline">main_game()</span> na řádku ~943</li>
+            <li><strong>Obtížnosti:</strong> slovník <span class="code-inline">DIFFICULTY_PROFILES</span> na řádku ~159</li>
+            <li><strong>Login obrazovka:</strong> funkce <span class="code-inline">login_register_screen()</span> na řádku ~434</li>
+        </ul>
+
+        <h4>Backend API</h4>
+        <ul>
+            <li><strong>Autentizace:</strong> <span class="code-inline">login.php</span> (řádky 40-65 - ověření hesla)</li>
+            <li><strong>Best-score:</strong> <span class="code-inline">submit_score.php</span> (řádky 50-80 - DELETE+INSERT logika)</li>
+            <li><strong>Validace jména:</strong> <span class="code-inline">change_username.php</span> (řádky 35-45 - regex check)</li>
+        </ul>
+
+        <h4>Frontend</h4>
+        <ul>
+            <li><strong>Auth modal:</strong> <span class="code-inline">script.js</span> funkce <span class="code-inline">wireAuthModal()</span></li>
+            <li><strong>Profil panel:</strong> <span class="code-inline">script.js</span> funkce <span class="code-inline">openProfilePanel()</span></li>
+            <li><strong>Filtry:</strong> <span class="code-inline">script.js</span> funkce <span class="code-inline">filterAndDisplay()</span></li>
+        </ul>
+
+        <h3>Často měněné hodnoty</h3>
+
+        <div class="warning-box">
+            <strong>Připojení k databázi:</strong> soubor <span class="code-inline">config.php</span>, řádky 9-12
+            <pre style="background: white; padding: 8px; border-radius: 4px; margin-top: 8px;">define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'flappy_palach');</pre>
+        </div>
+
+        <div class="warning-box">
+            <strong>URL endpointů v Pythonu:</strong> soubor <span class="code-inline">flappy_palach_commented.py</span>, řádky 14-16
+            <pre style="background: white; padding: 8px; border-radius: 4px; margin-top: 8px;">SCORE_SERVER_URL = "http://localhost/flappy_palach/submit_score.php"
+LOGIN_URL = "http://localhost/flappy_palach/login.php"
+REGISTER_URL = "http://localhost/flappy_palach/register.php"</pre>
+        </div>
+
+        <div class="warning-box">
+            <strong>Herní obtížnost:</strong> soubor <span class="code-inline">flappy_palach_commented.py</span>, řádky 159-178
+            <pre style="background: white; padding: 8px; border-radius: 4px; margin-top: 8px;">DIFFICULTY_PROFILES = {
+    "lehka": {
+        "speed_inc": 0.0,
+        "gap_dec": 0,
+        "score_step": 3
+    },
+    # ...
+}</pre>
+        </div>
+
+        <h3>Testování změn</h3>
+
+        <p>Po jakékoliv úpravě kódu proveď tyto kroky:</p>
+
+        <ol>
+            <li><strong>Python změny:</strong> Zavři hru a spusť znovu</li>
+            <li><strong>PHP změny:</strong> Pouze obnov stránku v prohlížeči (PHP neukládá stav)</li>
+            <li><strong>JS/CSS změny:</strong> Obnov stránku s vymazáním cache (Ctrl+Shift+R)</li>
+            <li><strong>Databázové změny:</strong> Spusť SQL příkaz v phpMyAdmin</li>
+        </ol>
+
+        <h3>Časté problémy a řešení</h3>
+
+        <p><strong>Problém:</strong> Python hra hlásí "Chyba připojení"</p>
+        <p><strong>Řešení:</strong> Zkontroluj že Apache v XAMPP běží. Otevři <span class="code-inline">http://localhost/flappy_palach/login.php</span> v prohlížeči - měl by vrátit JSON chybu.</p>
+
+        <p><strong>Problém:</strong> "Access denied for user root"</p>
+        <p><strong>Řešení:</strong> V phpMyAdmin zkontroluj uživatele. Možná máš nastavené heslo pro root. Uprav <span class="code-inline">config.php</span>.</p>
+
+        <p><strong>Problém:</strong> Skóre se neuloží</p>
+        <p><strong>Řešení:</strong> Zkontroluj Console výstup Pythonu. Měla by tam být zpráva "Skóre úspěšně odesláno" nebo chyba.</p>
+    </section>
+
+    <!-- ========== 2. UŽIVATELSKÁ PŘÍRUČKA ========== -->
+    <section class="doc-section" id="manual">
+        <h2 class="section-title">2. UŽIVATELSKÁ PŘÍRUČKA</h2>
+
+        <p>Návod pro hráče jak používat systém Flappy Palach.</p>
+
+        <h3>Začínáme</h3>
+
+        <h4>Registrace nového účtu</h4>
+        <ol>
+            <li>Spusť hru <span class="code-inline">flappy_palach_commented.py</span></li>
+            <li>Otevře se okno s přihlášením</li>
+            <li>Klikni na záložku "REGISTER"</li>
+            <li>Zadej přihlašovací jméno (minimálně 3 znaky)</li>
+            <li>Zadej heslo (minimálně 4 znaky)</li>
+            <li>Klikni "START" nebo stiskni Enter</li>
+        </ol>
+
+        <div class="warning-box">
+            <strong>Poznámka:</strong> Jméno musí být unikátní. Pokud už existuje, zobrazí se chyba "Jméno je již obsazené".
+        </div>
+
+        <h4>Přihlášení</h4>
+        <ol>
+            <li>Spusť hru</li>
+            <li>Zadej své jméno a heslo</li>
+            <li>Klikni "START"</li>
+        </ol>
+
+        <h3>Hraní</h3>
+
+        <h4>Výběr obtížnosti</h4>
+        <p>Po přihlášení si vybereš jednu ze tří úrovní:</p>
+        <ul>
+            <li><strong>Lehká:</strong> Konstantní rychlost, mezera se nezmenšuje</li>
+            <li><strong>Střední:</strong> Rychlost roste o 0.25 každých 3 bodů, mezera se zmenšuje o 3px</li>
+            <li><strong>Těžká:</strong> Rychlost roste o 0.5 každých 3 bodů, mezera se zmenšuje o 6px</li>
+        </ul>
+
+        <h4>Ovládání ve hře</h4>
+        <ul>
+            <li><strong>Mezerník</strong> nebo <strong>klik myší</strong> - skok ptáčka</li>
+            <li><strong>ESC</strong> - pauza (zobrazí menu)</li>
+        </ul>
+
+        <h4>Cíl hry</h4>
+        <p>Prolétnout co nejvíce trubkami bez nárazu. Za každou proletnutou trubku získáš 1 bod.</p>
+
+        <h3>Systém skóre</h3>
+
+        <h4>Jak funguje žebříček</h4>
+        <p>Systém ukládá pouze tvoje <strong>nejlepší skóre</strong> na každé obtížnosti. Pokud dosáhneš lepšího výsledku, starý záznam se automaticky přepíše.</p>
+
+        <div class="highlight-box">
+            <h4>Příklad:</h4>
+            <p>1. Hraješ na Střední obtížnosti → dosáhneš 50 bodů → uloží se<br>
+            2. Hraješ znovu na Střední → dosáhneš 30 bodů → NEULOŽÍ SE (je horší než 50)<br>
+            3. Hraješ znovu na Střední → dosáhneš 80 bodů → ULOŽÍ SE (starý záznam 50 se smaže)</p>
+        </div>
+
+        <h3>Webový žebříček</h3>
+
+        <h4>Přístup k žebříčku</h4>
+        <ol>
+            <li>Otevři prohlížeč</li>
+            <li>Jdi na <span class="code-inline">http://localhost/flappy_palach/</span></li>
+            <li>Přihlaš se stejnými údaji jako ve hře</li>
+        </ol>
+
+        <h4>Funkce žebříčku</h4>
+        <ul>
+            <li><strong>Vyhledávání:</strong> Zadej jméno hráče do pole nahoře</li>
+            <li><strong>Filtry:</strong> Klikni na tlačítka Lehká/Střední/Těžká pro zobrazení jen té obtížnosti</li>
+            <li><strong>Profil:</strong> Po přihlášení klikni na tlačítko "PROFIL" pro zobrazení tvých statistik</li>
+        </ul>
+
+        <h3>Osobní profil</h3>
+
+        <p>V profilu najdeš:</p>
+        <ul>
+            <li><strong>Nejlepší skóre:</strong> Tvůj rekord na každé obtížnosti</li>
+            <li><strong>Historie pokusů:</strong> Všechny tvoje hry seřazené od nejnovější</li>
+            <li><strong>Změna jména:</strong> Možnost změnit přihlašovací jméno</li>
+        </ul>
+
+        <h4>Změna jména</h4>
+        <ol>
+            <li>V profilu najdi sekci "Změnit jméno"</li>
+            <li>Zadej nové jméno</li>
+            <li>Klikni "OK"</li>
+        </ol>
+
+        <div class="warning-box">
+            <strong>Upozornění:</strong> Nové jméno nesmí být již používané jiným hráčem.
+        </div>
+
+        <h3>Časté dotazy</h3>
+
+        <p><strong>Q: Zapomněl jsem heslo. Jak ho obnovím?</strong><br>
+        A: Systém momentálně nemá funkci obnovy hesla. Kontaktuj správce pro reset.</p>
+
+        <p><strong>Q: Můžu mít více účtů?</strong><br>
+        A: Ano, ale každý účet musí mít unikátní jméno.</p>
+
+        <p><strong>Q: Proč se moje horší skóre neuložilo?</strong><br>
+        A: Systém ukládá pouze tvůj nejlepší výsledek na každé obtížnosti.</p>
+
+        <p><strong>Q: Můžu smazat svůj účet?</strong><br>
+        A: Smazání účtu momentálně není možné přes rozhraní. Kontaktuj správce.</p>
+
+        <p><strong>Q: Jak se dostanu do top 3?</strong><br>
+        A: Musíš dosáhnout jednoho ze tří nejlepších skóre na dané obtížnosti.</p>
+    </section>
+
+    <!-- ========== 3. PREZENTACE PRO INVESTORA ========== -->
+    <section class="doc-section" id="presentation">
+        <h2 class="section-title">3. OBSAH PREZENTACE PRO INVESTORA</h2>
+
+        <p>Doporučená struktura prezentace projektu Flappy Palach pro potenciální investory nebo zadavatele.</p>
+
+        <h3>Slide 1: Titulní snímek</h3>
+        <ul>
+            <li>Název projektu: Flappy Palach</li>
+            <li>Podtitul: Full-stack hra s online žebříčkem</li>
+            <li>Tvoje jméno a datum</li>
+            <li>Vizuál: Screenshot hlavní obrazovky hry</li>
+        </ul>
+
+        <h3>Slide 2: Problém a řešení</h3>
+        <p><strong>Problém:</strong></p>
+        <ul>
+            <li>Tradiční jednoduché hry nemají online komponentu</li>
+            <li>Chybí motivace k opakovanému hraní (žádný žebříček)</li>
+            <li>Offline hry neumožňují soutěživost mezi hráči</li>
+        </ul>
+
+        <p><strong>Řešení:</strong></p>
+        <ul>
+            <li>Kombinace desktopové hry s webovým žebříčkem</li>
+            <li>Uživatelské účty a osobní statistiky</li>
+            <li>Tři úrovně obtížnosti pro různé typy hráčů</li>
+        </ul>
+
+        <h3>Slide 3: Technologický stack</h3>
+        <div class="highlight-box">
+            <p><strong>Frontend:</strong> HTML5, CSS3, JavaScript ES6+<br>
+            <strong>Backend:</strong> PHP 8, MySQL 8, Apache<br>
+            <strong>Desktopová hra:</strong> Python 3.10+, Pygame<br>
+            <strong>Komunikace:</strong> RESTful API, JSON</p>
+        </div>
+
+        <p>Zdůrazni:</p>
+        <ul>
+            <li>Moderní, osvědčené technologie</li>
+            <li>Škálovatelná architektura</li>
+            <li>Bezpečnost (bcrypt, prepared statements)</li>
+        </ul>
+
+        <h3>Slide 4: Klíčové funkce</h3>
+        <p>Vyber 4-5 nejdůležitějších funkcí:</p>
+        <ol>
+            <li><strong>Uživatelské účty</strong> - registrace, login, změna jména</li>
+            <li><strong>Best-score systém</strong> - ukládání pouze nejlepších výsledků</li>
+            <li><strong>Tři obtížnosti</strong> - Lehká, Střední, Těžká</li>
+            <li><strong>Webový žebříček</strong> - vyhledávání, filtry, statistiky</li>
+            <li><strong>Osobní profil</strong> - historie všech pokusů</li>
+        </ol>
+
+        <h3>Slide 5: Architektura systému</h3>
+        <p>Ukázka komunikačního toku:</p>
+        <pre style="background: #f4f4f4; padding: 16px; border-radius: 6px;">
+Python hra ──► PHP API ──► MySQL databáze
+     ▲                           │
+     └───────────────────────────┘
+            JSON odpověď</pre>
+
+        <p>Zdůrazni:</p>
+        <ul>
+            <li>Oddělení prezentační vrstvy od logiky</li>
+            <li>REST API umožňuje snadné rozšíření (mobilní app)</li>
+            <li>Relační databáze zajišťuje integritu dat</li>
+        </ul>
+
+        <h3>Slide 6: Databázový model</h3>
+        <ul>
+            <li>Ukázka ER diagramu (soubor er.png)</li>
+            <li>Vysvětlení vztahu 1:N mezi users a scores</li>
+            <li>Zmínka o foreign key CASCADE DELETE</li>
+        </ul>
+
+        <h3>Slide 7: Bezpečnost</h3>
+        <p>Implementovaná bezpečnostní opatření:</p>
+        <ul>
+            <li><strong>Password hashing:</strong> Bcrypt s cost 10</li>
+            <li><strong>SQL injection prevence:</strong> Prepared statements</li>
+            <li><strong>XSS protection:</strong> Escapování HTML na frontendu</li>
+            <li><strong>Input validace:</strong> Server i klient</li>
+            <li><strong>Foreign key constraints:</strong> Referenční integrita</li>
+        </ul>
+
+        <h3>Slide 8: Živá ukázka</h3>
+        <p>Doporučený postup pro demo:</p>
+        <ol>
+            <li>Otevři webový žebříček - ukaž top 3 hráče</li>
+            <li>Spusť Python hru</li>
+            <li>Zaregistruj nový účet</li>
+            <li>Vyber obtížnost a zahraj krátkou hru</li>
+            <li>Po smrti ukaž že se skóre objevilo v žebříčku</li>
+            <li>Otevři profil - ukaž statistiky a historii</li>
+        </ol>
+
+        <div class="warning-box">
+            <strong>Tip:</strong> Připrav si předem účet s dobrým skóre, aby demo vypadalo působivě.
+        </div>
+
+        <h3>Slide 9: Automatizované testy</h3>
+        <p>Zmínka o quality assurance:</p>
+        <ul>
+            <li><strong>Test 1:</strong> Kolizní detekce (Python unittest)</li>
+            <li><strong>Test 2:</strong> Databázové operace (PHP)</li>
+            <li>Možnost živého spuštění testů</li>
+        </ul>
+
+        <h3>Slide 10: Výzvy a řešení</h3>
+        <p>Technické výzvy během vývoje:</p>
+
+        <p><strong>Výzva 1:</strong> Best-score logika<br>
+        <strong>Řešení:</strong> DELETE + INSERT pattern místo UPDATE</p>
+
+        <p><strong>Výzva 2:</strong> Synchronizace jména mezi tabulkami<br>
+        <strong>Řešení:</strong> Denormalizace username sloupce pro rychlost</p>
+
+        <p><strong>Výzva 3:</strong> Ochrana proti duplicitním záznamům<br>
+        <strong>Řešení:</strong> UNIQUE constraint + aplikační logika</p>
+
+        <h3>Slide 11: Budoucí rozšíření</h3>
+        <p>Roadmapa dalšího vývoje:</p>
+        <ul>
+            <li><strong>Krátkodobě (1-3 měsíce):</strong>
+                <ul>
+                    <li>Týdenní/měsíční žebříčky</li>
+                    <li>Achievements systém</li>
+                    <li>Profilové obrázky</li>
+                </ul>
+            </li>
+            <li><strong>Střednědobě (3-6 měsíců):</strong>
+                <ul>
+                    <li>Mobilní aplikace (React Native)</li>
+                    <li>OAuth integrace (Google, GitHub)</li>
+                    <li>Kamarádský systém</li>
+                </ul>
+            </li>
+            <li><strong>Dlouhodobě (6-12 měsíců):</strong>
+                <ul>
+                    <li>Turnaje a sezóny</li>
+                    <li>Monetizace (skins, power-ups)</li>
+                    <li>Social sharing</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>Slide 12: Investiční požadavek (pokud relevantní)</h3>
+        <p>Struktura investičního slideu:</p>
+        <ul>
+            <li>Požadovaná částka</li>
+            <li>Použití prostředků (hosting, marketing, vývoj)</li>
+            <li>Očekávaný ROI</li>
+            <li>Timeline do profitability</li>
+        </ul>
+
+        <h3>Slide 13: Závěr</h3>
+        <ul>
+            <li>Shrnutí klíčových bodů</li>
+            <li>Call to action (zkušební přístup, schůzka)</li>
+            <li>Kontaktní informace</li>
+        </ul>
+
+        <h3>Doporučení pro prezentaci</h3>
+
+        <div class="highlight-box">
+            <h4>Časování</h4>
+            <p>Celková délka: 10-15 minut<br>
+            Demo: 3-5 minut<br>
+            Q&A: 5-10 minut</p>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Vizuální styl</h4>
+            <p>Použij pixelový design z hry<br>
+            Zelená (#5dbe5a) jako hlavní barva<br>
+            Font: Press Start 2P pro nadpisy<br>
+            Minimalistické slidy - méně textu, více vizuálů</p>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Co zdůraznit</h4>
+            <p>1. Technická komplexita (full-stack)<br>
+            2. Bezpečnost a best practices<br>
+            3. Škálovatelnost řešení<br>
+            4. Automatizované testy</p>
+        </div>
+
+        <div class="warning-box">
+            <strong>Varování:</strong> Vyhni se technickému žargonu pokud publikum nejsou vývojáři. Místo "prepared statements pro prevenci SQL injection" řekni "ochrana proti hackerským útokům na databázi".
+        </div>
+    </section>
+
+    <!-- PATIČKA -->
+    <footer class="game-footer">
+        <p>© 2025 FLAPPY PALACH</p>
+        <p class="footer-note">
+            <a href="popis.html" style="color: var(--pipe-dark); text-decoration: none; font-weight: bold;">← Zpět na hlavní dokumentaci</a>
+        </p>
+    </footer>
+
+</div>
+
+</body>
+</html>
