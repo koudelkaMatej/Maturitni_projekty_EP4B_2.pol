@@ -54,35 +54,7 @@
     </div>
 
     <div id="lb-container">
-        
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Hráč</th>
-                        <th>Skóre</th>
-                        <th>Čas</th>
-                        <th>Obtížnost</th>
-                    </tr>
-                </thead>
-                <tbody>
-            <tr>
-                <td class="rank-1">🥇</td>
-                <td>Kralik1</td>
-                <td class="score-cell">1595</td>
-                <td>2:27</td>
-                <td><span class="badge badge-Normal">Normal</span></td>
-            </tr>
-            <tr>
-                <td class="rank-2">🥈</td>
-                <td>Kralik1</td>
-                <td class="score-cell">175</td>
-                <td>0:16</td>
-                <td><span class="badge badge-Normal">Normal</span></td>
-            </tr></tbody>
-            </table>
-        </div>
+        %%TABLE_PLACEHOLDER%%
     </div>
 
     <div style="text-align:center; margin-top:22px;">
@@ -95,7 +67,7 @@
 
 <script src="auth.js"></script>
 <script>
-    const ALL_ENTRIES = [{"name": "Kralik1", "score": 1595, "difficulty": "Normal", "time": 147}, {"name": "Kralik1", "score": 175, "difficulty": "Normal", "time": 16}];
+    const ALL_ENTRIES = %%JSON_DATA%%;
 
     let currentTab = 'all';
 
