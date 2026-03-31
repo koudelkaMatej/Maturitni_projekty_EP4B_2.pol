@@ -1,0 +1,540 @@
+/* ============================================================
+   TETRIS WEB - Sdílené styly pro celý web
+   Téma: Retro arcade / pixel-art, tmavé pozadí, neonové akcenty
+   ============================================================ */
+
+/* Import Google Fonts - Press Start 2P = pixel font pro nadpisy,
+   DM Mono = monospace font pro texty */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* CSS proměnné - barvy a hodnoty které se opakují na více místech */
+:root {
+  --bg-dark:      #0a0a0f;       /* Velmi tmavé pozadí stránky */
+  --bg-card:      #12121a;       /* Trochu světlejší - pro karty */
+  --bg-nav:       #0d0d15;       /* Pozadí navigace */
+  --border:       #1e1e30;       /* Barva ohraničení prvků */
+  --accent-cyan:  #00f5ff;       /* Neonová azurová - hlavní akcent */
+  --accent-green: #39ff14;       /* Neonová zelená - druhý akcent */
+  --accent-red:   #ff2d55;       /* Neonová červená - varování, chyby */
+  --accent-yellow:#ffe600;       /* Neonová žlutá - zvýraznění */
+  --text-primary: #e8e8f0;       /* Hlavní text - téměř bílý */
+  --text-muted:   #5a5a7a;       /* Méně důležitý text - šedý */
+  --glow-cyan:    0 0 10px #00f5ff55, 0 0 20px #00f5ff22;  /* Neonový zásvit azurové */
+  --glow-green:   0 0 10px #39ff1455, 0 0 20px #39ff1422;  /* Neonový zásvit zelené */
+  --font-pixel:   'Press Start 2P', monospace;  /* Pixel font pro nadpisy */
+  --font-mono:    'DM Mono', monospace;          /* Monospace pro text */
+  --radius:       4px;           /* Zaoblení rohů - mírné, protože retro styl */
+  --transition:   0.18s ease;    /* Rychlost přechodů u hover efektů */
+}
+
+/* Reset - sjednocení výchozích stylů prohlížečů */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;  /* Padding a border se počítají do šířky/výšky */
+}
+
+/* Základní styl celé stránky */
+html {
+  scroll-behavior: smooth;     /* Plynulé scrollování při kliknutí na kotvy */
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 100vh;
+  /* Jemný rastrovací overlay - vytváří atmosféru starého monitoru */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,245,255,0.015) 2px,
+      rgba(0,245,255,0.015) 4px
+    );
+}
+
+/* ============================================================
+   NAVIGACE
+   ============================================================ */
+.navbar {
+  position: sticky;              /* Zůstane nahoře při scrollování */
+  top: 0;
+  z-index: 100;                  /* Nad ostatním obsahem */
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  /* Lehký blur efekt pod navigací */
+  backdrop-filter: blur(12px);
+}
+
+/* Logo v navigaci */
+.nav-logo {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--accent-cyan);
+  text-decoration: none;
+  text-shadow: var(--glow-cyan);
+  letter-spacing: 2px;
+}
+
+/* Skupina odkazů v navigaci */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+/* Jednotlivé odkazy v navigaci */
+.nav-links a {
+  display: block;
+  padding: 0.4rem 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  transition: color var(--transition), background var(--transition);
+  position: relative;
+}
+
+/* Hover efekt na navigačních odkazech */
+.nav-links a:hover {
+  color: var(--accent-cyan);
+  background: rgba(0,245,255,0.06);
+}
+
+/* Aktivní stránka - zvýrazněný odkaz */
+.nav-links a.active {
+  color: var(--accent-cyan);
+  background: rgba(0,245,255,0.1);
+}
+
+/* Svislý oddělovač mezi skupinami odkazů */
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 0.5rem;
+}
+
+/* Pravá část navigace - tlačítka přihlášení */
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Jméno přihlášeného uživatele */
+.nav-user {
+  font-size: 11px;
+  color: var(--accent-green);
+  text-shadow: var(--glow-green);
+  padding: 0.3rem 0.6rem;
+  border: 1px solid rgba(57,255,20,0.3);
+  border-radius: var(--radius);
+}
+
+/* ============================================================
+   TLAČÍTKA
+   ============================================================ */
+
+/* Základní styl všech tlačítek */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+/* Primární tlačítko - azurové */
+.btn-primary {
+  background: rgba(0,245,255,0.12);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+.btn-primary:hover {
+  background: rgba(0,245,255,0.22);
+  box-shadow: var(--glow-cyan);
+}
+
+/* Sekundární tlačítko - zelené */
+.btn-success {
+  background: rgba(57,255,20,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+.btn-success:hover {
+  background: rgba(57,255,20,0.2);
+  box-shadow: var(--glow-green);
+}
+
+/* Nebezpečné tlačítko - červené (odhlášení, smazání) */
+.btn-danger {
+  background: rgba(255,45,85,0.1);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+.btn-danger:hover {
+  background: rgba(255,45,85,0.2);
+}
+
+/* Ghost tlačítko - průhledné */
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.btn-ghost:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+/* Velké tlačítko */
+.btn-lg {
+  padding: 0.8rem 1.8rem;
+  font-size: 13px;
+}
+
+/* Tlačítko přes celou šířku */
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ============================================================
+   FORMULÁŘOVÉ PRVKY
+   ============================================================ */
+
+/* Skupina formuláře - label + input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+/* Popisek pole */
+.form-group label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Textové pole */
+.form-group input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.9rem;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+/* Aktivní (fokusované) textové pole */
+.form-group input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0,245,255,0.08);
+}
+
+/* Chybové pole */
+.form-group input.error {
+  border-color: var(--accent-red);
+}
+
+/* Chybová zpráva pod polem */
+.form-error {
+  font-size: 11px;
+  color: var(--accent-red);
+  margin-top: 0.2rem;
+}
+
+/* Úspěšná zpráva */
+.form-success {
+  font-size: 11px;
+  color: var(--accent-green);
+  margin-top: 0.2rem;
+}
+
+/* ============================================================
+   KARTY (cards) - ohraničené boxy s obsahem
+   ============================================================ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+/* Nadpis karty */
+.card-title {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--accent-cyan);
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ============================================================
+   UPOZORNĚNÍ (alerts) - barevné zprávy pro uživatele
+   ============================================================ */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  font-size: 12px;
+  border: 1px solid;
+  margin-bottom: 1rem;
+}
+.alert-error {
+  background: rgba(255,45,85,0.08);
+  border-color: rgba(255,45,85,0.4);
+  color: var(--accent-red);
+}
+.alert-success {
+  background: rgba(57,255,20,0.08);
+  border-color: rgba(57,255,20,0.4);
+  color: var(--accent-green);
+}
+.alert-info {
+  background: rgba(0,245,255,0.08);
+  border-color: rgba(0,245,255,0.4);
+  color: var(--accent-cyan);
+}
+
+/* ============================================================
+   TABULKA SKÓRE
+   ============================================================ */
+.score-table {
+  width: 100%;
+  border-collapse: collapse;  /* Bez mezer mezi buňkami */
+}
+
+/* Hlavička tabulky */
+.score-table thead th {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Buňky tabulky */
+.score-table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(30,30,48,0.5);
+  font-size: 13px;
+  transition: background var(--transition);
+}
+
+/* Hover efekt na řádku */
+.score-table tbody tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+/* Zvýraznění přihlášeného uživatele v tabulce */
+.score-table tbody tr.current-user td {
+  background: rgba(57,255,20,0.05);
+  color: var(--accent-green);
+}
+.score-table tbody tr.current-user td:first-child {
+  border-left: 2px solid var(--accent-green);
+}
+
+/* Medaile pro top 3 */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+.rank-1 { background: rgba(255,230,0,0.15);  color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+.rank-2 { background: rgba(180,180,180,0.1); color: #b0b0c0;              border: 1px solid #555577; }
+.rank-3 { background: rgba(255,120,60,0.1);  color: #ff7840;              border: 1px solid #884422; }
+.rank-n { background: transparent;           color: var(--text-muted);    border: 1px solid var(--border); }
+
+/* Skóre v tabulce */
+.score-value {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--accent-cyan);
+}
+.score-value.current-user {
+  color: var(--accent-green);
+  text-shadow: var(--glow-green);
+}
+
+/* ============================================================
+   ZÁLOŽKY (tabs)
+   ============================================================ */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+/* Jedna záložka */
+.tab-btn {
+  padding: 0.65rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-bottom: -1px;  /* Překrytí spodní čáry .tabs */
+}
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active {
+  color: var(--accent-cyan);
+  border-bottom-color: var(--accent-cyan);
+}
+
+/* Obsah záložky - skrytý pokud není aktivní */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ============================================================
+   LAYOUT POMOCNÍCI
+   ============================================================ */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.page-content {
+  padding: 2rem 0 4rem;
+}
+
+/* Mřížka pro dvousloupcové rozložení */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Mřížka pro třísloupcové rozložení */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+/* Nadpis stránky */
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.page-header h1 {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--accent-cyan);
+  text-shadow: var(--glow-cyan);
+  letter-spacing: 3px;
+  margin-bottom: 0.4rem;
+}
+.page-header p {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ============================================================
+   PIXEL-ART DEKORACE - statická Tetris kostička
+   ============================================================ */
+.tetris-deco {
+  display: inline-grid;
+  grid-template-columns: repeat(4, 12px);
+  gap: 2px;
+  opacity: 0.6;
+}
+.tetris-deco span {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.deco-filled { background: var(--accent-cyan); box-shadow: var(--glow-cyan); }
+.deco-empty  { background: transparent; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* ============================================================
+   RESPONSIVITA - mobilní zařízení
+   ============================================================ */
+@media (max-width: 768px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .navbar { padding: 0 1rem; }
+  .nav-links { display: none; }  /* Na mobilu skryjeme navigační odkazy */
+  .container { padding: 0 1rem; }
+}
+
+/* ============================================================
+   ANIMACE
+   ============================================================ */
+
+/* Blikání - pro neonový efekt */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Nástup zdola */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Třpyt zásvitu */
+@keyframes glowPulse {
+  0%, 100% { text-shadow: var(--glow-cyan); }
+  50%       { text-shadow: 0 0 20px #00f5ffaa, 0 0 40px #00f5ff44; }
+}
+
+.anim-fadeup { animation: fadeUp 0.4s ease both; }
+.anim-glow   { animation: glowPulse 3s ease-in-out infinite; }

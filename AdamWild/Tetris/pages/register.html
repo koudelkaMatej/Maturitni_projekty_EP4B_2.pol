@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Registrace</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Stejné styly jako login stránka */
+    .auth-page {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .auth-box {
+      width: 100%;
+      max-width: 420px;
+    }
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .auth-logo h1 {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--accent-green);
+      text-shadow: var(--glow-green);
+      margin-bottom: 0.5rem;
+    }
+    .auth-logo p {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .auth-footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    /* Informační box - vysvětlení propojení se hrou */
+    .info-box {
+      background: rgba(0,245,255,0.04);
+      border: 1px solid rgba(0,245,255,0.15);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .info-box p {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .info-box strong {
+      color: var(--accent-cyan);
+    }
+
+    /* Ukazatel síly hesla */
+    .password-strength {
+      margin-top: 0.4rem;
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+    .strength-bar {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .strength-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      min-width: 50px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar"></nav>
+
+  <div class="auth-page">
+    <div class="auth-box anim-fadeup">
+
+      <div class="auth-logo">
+        <h1>[ REGISTER ]</h1>
+        <p>Vytvoř si účet a sleduj své skóre</p>
+      </div>
+
+      <div class="auth-card">
+
+        <!-- Info o propojení se hrou -->
+        <div class="info-box">
+          <p>
+            💡 <strong>Tip:</strong> Zaregistruj se pod stejným jménem, které používáš ve hře.
+            Tvoje skóre se pak automaticky zobrazí v žebříčku a bude <strong>zvýrazněno zeleně</strong>.
+          </p>
+        </div>
+
+        <!-- Zpráva -->
+        <div id="msg" style="display:none;"></div>
+
+        <!-- Jméno -->
+        <div class="form-group">
+          <label for="username">Uživatelské jméno</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="3–16 znaků, a-z, 0-9, _"
+            maxlength="16"
+            oninput="checkUsername()"
+          >
+          <!-- Nápověda / chyba pod polem -->
+          <div id="username-hint" style="font-size:11px;color:var(--text-muted);margin-top:0.2rem;">
+            Použij stejné jméno jako ve hře
+          </div>
+        </div>
+
+        <!-- Heslo -->
+        <div class="form-group">
+          <label for="password">Heslo</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Minimálně 4 znaky"
+            oninput="checkPasswordStrength()"
+          >
+          <!-- Ukazatel síly hesla -->
+          <div class="password-strength">
+            <div class="strength-bar" id="bar1"></div>
+            <div class="strength-bar" id="bar2"></div>
+            <div class="strength-bar" id="bar3"></div>
+            <div class="strength-bar" id="bar4"></div>
+            <span class="strength-label" id="strength-label"></span>
+          </div>
+        </div>
+
+        <!-- Potvrzení hesla -->
+        <div class="form-group">
+          <label for="password2">Potvrdit heslo</label>
+          <input
+            type="password"
+            id="password2"
+            placeholder="Zadej heslo znovu"
+            oninput="checkPasswordMatch()"
+          >
+          <div id="password-match-hint" style="font-size:11px;margin-top:0.2rem;"></div>
+        </div>
+
+        <!-- Tlačítko -->
+        <button class="btn btn-success btn-full btn-lg" id="register-btn" onclick="doRegister()">
+          ✚ Zaregistrovat se
+        </button>
+      </div>
+
+      <p class="auth-footer">
+        Již máš účet?
+        <a href="login.html">Přihlásit se</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+
+    // Přesměrování pokud je uživatel již přihlášen
+    document.addEventListener('DOMContentLoaded', function() {
+      if (getCurrentUser()) {
+        window.location.href = '../index.html';
+      }
+    });
+
+    /**
+     * Živá kontrola uživatelského jména při psaní.
+     * Zobrazuje hint zda je jméno dostupné.
+     */
+    function checkUsername() {
+      const val = document.getElementById('username').value.trim();
+      const hint = document.getElementById('username-hint');
+      const input = document.getElementById('username');
+
+      if (!val) {
+        hint.textContent = 'Použij stejné jméno jako ve hře';
+        hint.style.color = 'var(--text-muted)';
+        input.classList.remove('error');
+        return;
+      }
+
+      if (val.length < 3) {
+        hint.textContent = 'Jméno musí mít alespoň 3 znaky';
+        hint.style.color = 'var(--accent-red)';
+        input.classList.add('error');
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(val)) {
+        hint.textContent = 'Povoleny jsou pouze písmena, číslice a _';
+        hint.style.color = 'var(--accent-red)';
+        input.classList.add('error');
+        return;
+      }
+
+      // Zkontrolujeme dostupnost jména
+      const users = getUsers();
+      const taken = users.some(u => u.username.toLowerCase() === val.toLowerCase());
+      if (taken) {
+        hint.textContent = '✗ Toto jméno je již obsazeno';
+        hint.style.color = 'var(--accent-red)';
+        input.classList.add('error');
+      } else {
+        hint.textContent = '✓ Jméno je dostupné';
+        hint.style.color = 'var(--accent-green)';
+        input.classList.remove('error');
+      }
+    }
+
+    /**
+     * Ukazatel síly hesla - mění barvy proužků a popisek.
+     */
+    function checkPasswordStrength() {
+      const pwd = document.getElementById('password').value;
+      const bars = [
+        document.getElementById('bar1'),
+        document.getElementById('bar2'),
+        document.getElementById('bar3'),
+        document.getElementById('bar4'),
+      ];
+      const label = document.getElementById('strength-label');
+
+      // Vyhodnotíme sílu hesla (0-4 body)
+      let strength = 0;
+      if (pwd.length >= 4)  strength++;    // Minimální délka
+      if (pwd.length >= 8)  strength++;    // Dobrá délka
+      if (/[0-9]/.test(pwd)) strength++;   // Obsahuje číslo
+      if (/[^a-zA-Z0-9]/.test(pwd)) strength++;  // Obsahuje speciální znak
+
+      // Nastavíme barvy proužků
+      const colors = ['transparent','var(--accent-red)','var(--accent-yellow)','#ff7f00','var(--accent-green)'];
+      const labels = ['','Slabé','Střední','Silné','Velmi silné'];
+
+      bars.forEach((bar, i) => {
+        bar.style.background = i < strength ? colors[strength] : 'var(--border)';
+      });
+      label.textContent = labels[strength];
+      label.style.color = colors[strength];
+    }
+
+    /**
+     * Kontroluje shodu hesel při psaní.
+     */
+    function checkPasswordMatch() {
+      const p1 = document.getElementById('password').value;
+      const p2 = document.getElementById('password2').value;
+      const hint = document.getElementById('password-match-hint');
+      const input = document.getElementById('password2');
+
+      if (!p2) { hint.textContent = ''; return; }
+
+      if (p1 === p2) {
+        hint.textContent = '✓ Hesla se shodují';
+        hint.style.color = 'var(--accent-green)';
+        input.classList.remove('error');
+      } else {
+        hint.textContent = '✗ Hesla se neshodují';
+        hint.style.color = 'var(--accent-red)';
+        input.classList.add('error');
+      }
+    }
+
+    /**
+     * Zpracuje registraci - zavolá register() z auth.js (async).
+     */
+    async function doRegister() {
+      const username  = document.getElementById('username').value.trim();
+      const password  = document.getElementById('password').value;
+      const password2 = document.getElementById('password2').value;
+
+      const msgEl = document.getElementById('msg');
+      msgEl.style.display = 'block';
+
+      if (password !== password2) {
+        msgEl.className = 'alert alert-error';
+        msgEl.textContent = 'Hesla se neshodují.';
+        return;
+      }
+
+      msgEl.className = 'alert alert-info';
+      msgEl.textContent = 'Zpracovávám...';
+
+      const result = await register(username, password);  // async - čte ze souboru
+
+      if (result.success) {
+        msgEl.className = 'alert alert-success';
+        msgEl.textContent = result.message;
+        // Nepřesměrováváme hned - uživatel musí nejprve přepsat soubor
+      } else {
+        msgEl.className = 'alert alert-error';
+        msgEl.textContent = result.message;
+      }
+    }
+
+    // Enter = registrovat
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doRegister();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Home</title>
+  <!-- Sdílené styly pro celý web -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ---- Styly pouze pro tuto stránku ---- */
+
+    /* Hero sekce - velký uvítací banner */
+    .hero {
+      padding: 4rem 0 3rem;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    /* Levá část hero - texty */
+    .hero-text { flex: 1; }
+
+    /* Velký pixel nadpis */
+    .hero-title {
+      font-family: var(--font-pixel);
+      font-size: clamp(22px, 4vw, 36px); /* Responzivní velikost */
+      color: var(--accent-cyan);
+      text-shadow: var(--glow-cyan);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    /* Podnadpis */
+    .hero-sub {
+      color: var(--text-muted);
+      font-size: 13px;
+      max-width: 500px;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+
+    /* Tlačítka v hero sekci */
+    .hero-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* Pravá část hero - animovaná Tetris mřížka */
+    .hero-visual {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(6, 28px); /* 6 sloupců po 28px */
+      grid-template-rows: repeat(10, 28px);   /* 10 řádků po 28px */
+      gap: 3px;
+      opacity: 0.8;
+    }
+
+    /* Jeden blok v hero vizuálu */
+    .hero-block {
+      border-radius: 3px;
+      transition: opacity 1.5s ease;
+    }
+
+    /* Statistiky pod hero */
+    .stats-row {
+      display: flex;
+      gap: 1px;
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden; /* Zaoblení se aplikuje na všechny children */
+    }
+
+    /* Jeden stat box */
+    .stat-box {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-box:last-child { border-right: none; }
+
+    /* Číslo ve stat boxu */
+    .stat-value {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--accent-cyan);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Popis stat boxu */
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Sekce s žebříčkem a info vedle sebe */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px; /* Tabulka + postranní panel */
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Postranní panel - info o hře */
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* Nadpis postranního panelu */
+    .sidebar-header {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Obsah postranního panelu */
+    .sidebar-body {
+      padding: 1rem;
+    }
+
+    /* Ovládací prvek ve sidebar */
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .control-row:last-child { border-bottom: none; }
+
+    /* Klávesa */
+    .key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 28px;
+      padding: 0 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-bottom: 2px solid var(--border);  /* 3D efekt klávesy */
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-family: var(--font-pixel);
+      white-space: nowrap;
+    }
+
+    /* Popis klávesy */
+    .key-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Refresh tlačítko u žebříčku */
+    .table-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    /* Info o přihlášeném uživateli nad tabulkou */
+    .logged-in-hint {
+      display: none;  /* Zobrazíme jen pokud je přihlášen */
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 11px;
+      color: var(--accent-green);
+      padding: 0.4rem 0.8rem;
+      border: 1px solid rgba(57,255,20,0.2);
+      border-radius: var(--radius);
+      background: rgba(57,255,20,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================
+       NAVIGACE - vyplní nav.js
+       ===================================================== -->
+  <nav class="navbar" id="navbar"></nav>
+
+  <div class="container page-content">
+
+    <!-- =====================================================
+         HERO SEKCE
+         ===================================================== -->
+    <section class="hero anim-fadeup">
+      <div class="hero-text">
+        <!-- Pixel blikající kurzor za nápisem -->
+        <h1 class="hero-title">TETRIS<span style="animation:blink 1s step-end infinite;">_</span></h1>
+        <p class="hero-sub">
+          Klasická arkádová hra přenesená do moderního prostředí.
+          Zaregistruj se, přihlas se pod stejným jménem ve hře a sleduj
+          svůj postup v žebříčku.
+        </p>
+        <div class="hero-actions">
+          <a href="pages/leaderboard.html" class="btn btn-primary btn-lg">
+            🏆 Žebříček
+          </a>
+          <a href="pages/docs.html" class="btn btn-ghost btn-lg">
+            📖 Dokumentace
+          </a>
+          <a href="pages/register.html" class="btn btn-success btn-lg" id="hero-register-btn">
+            ✚ Registrovat
+          </a>
+        </div>
+      </div>
+
+      <!-- Animovaná pixel mřížka jako dekorace -->
+      <div class="hero-visual" id="hero-grid" aria-hidden="true"></div>
+    </section>
+
+    <!-- Statistiky -->
+    <div class="stats-row anim-fadeup" style="animation-delay:0.1s">
+      <div class="stat-box">
+        <span class="stat-value" id="stat-players">0</span>
+        <span class="stat-label">Hráčů</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-value" id="stat-topscore">0</span>
+        <span class="stat-label">Nejlepší skóre</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-value" id="stat-registered">0</span>
+        <span class="stat-label">Registrovaných</span>
+      </div>
+    </div>
+
+    <!-- =====================================================
+         HLAVNÍ OBSAH - žebříček + sidebar
+         ===================================================== -->
+    <div class="main-grid anim-fadeup" style="animation-delay:0.2s">
+
+      <!-- Tabulka skóre -->
+      <div class="card">
+        <div class="table-actions">
+          <div class="card-title" style="margin-bottom:0;border:none;padding:0;">
+            🏆 Top hráči
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <!-- Zobrazí se jen pokud je uživatel přihlášen -->
+            <div class="logged-in-hint" id="logged-in-hint">
+              <span>●</span>
+              <span id="hint-username"></span>
+              <span style="color:var(--text-muted)">je zvýrazněn</span>
+            </div>
+            <button class="btn btn-ghost" onclick="loadScores()" style="font-size:11px;padding:0.3rem 0.7rem;">
+              ↻ Obnovit
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;" id="leaderboard-wrap">
+          <!-- Tabulka se vloží JavaScriptem -->
+          <p style="color:var(--text-muted);font-size:12px;text-align:center;padding:2rem;">
+            Načítání...
+          </p>
+        </div>
+      </div>
+
+      <!-- Postranní panel -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <!-- Ovládání -->
+        <div class="sidebar-card">
+          <div class="sidebar-header">⌨ Ovládání</div>
+          <div class="sidebar-body">
+            <div class="control-row">
+              <span class="key">←→</span>
+              <span class="key-desc">Pohyb doleva / doprava</span>
+            </div>
+            <div class="control-row">
+              <span class="key">R</span>
+              <span class="key-desc">Rotace kostičky</span>
+            </div>
+            <div class="control-row">
+              <span class="key">↓</span>
+              <span class="key-desc">Soft drop (normal mód)</span>
+            </div>
+            <div class="control-row">
+              <span class="key">SPC</span>
+              <span class="key-desc">Hard drop (okamžitý pád)</span>
+            </div>
+            <div class="control-row">
+              <span class="key">ESC</span>
+              <span class="key-desc">Pauza / pokračovat</span>
+            </div>
+            <div class="control-row">
+              <span class="key">M</span>
+              <span class="key-desc">Zpět do menu (při pauze)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skórování -->
+        <div class="sidebar-card">
+          <div class="sidebar-header">📊 Bodování</div>
+          <div class="sidebar-body">
+            <div class="control-row">
+              <span style="font-family:var(--font-pixel);font-size:10px;color:var(--accent-cyan);">100</span>
+              <span class="key-desc">za každý smazaný řádek</span>
+            </div>
+            <div class="control-row">
+              <span style="font-family:var(--font-pixel);font-size:10px;color:var(--accent-yellow);">+level</span>
+              <span class="key-desc">každých 1000 bodů</span>
+            </div>
+            <div class="control-row">
+              <span style="font-family:var(--font-pixel);font-size:10px;color:var(--accent-red);">HARD</span>
+              <span class="key-desc">rychlejší pád od začátku</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Přihlašovací box pro nepřihlášené -->
+        <div class="sidebar-card" id="auth-promo">
+          <div class="sidebar-header">👤 Účet</div>
+          <div class="sidebar-body">
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:1rem;line-height:1.7;">
+              Zaregistruj se a zadej stejné jméno ve hře — tvoje skóre se automaticky zobrazí v žebříčku a bude zvýrazněno.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;">
+              <a href="pages/register.html" class="btn btn-success btn-full">✚ Registrovat</a>
+              <a href="pages/login.html" class="btn btn-ghost btn-full">Přihlásit se</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Box pro přihlášené uživatele -->
+        <div class="sidebar-card" id="user-promo" style="display:none;">
+          <div class="sidebar-header">👤 Tvůj účet</div>
+          <div class="sidebar-body" id="user-promo-body">
+            <!-- Vyplní JavaScript -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <span style="color:var(--text-muted);">© 2024 Tetris Web</span>
+      &nbsp;·&nbsp;
+      <a href="pages/docs.html" style="color:var(--text-muted);text-decoration:none;">Dokumentace</a>
+    </div>
+  </footer>
+
+  <!-- Skripty - pořadí záleží! auth.js musí být před nav.js -->
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    // ============================================================
+    // HERO ANIMOVANÁ MŘÍŽKA
+    // ============================================================
+
+    // Barvy Tetris kostiček (hex)
+    const BLOCK_COLORS = ['#00f5ff','#39ff14','#ffe600','#ff2d55','#bf5fff','#ff7f00','#00bfff'];
+    const EMPTY = 'transparent';
+
+    // Rozložení kostiček v hero mřížce (1 = vyplněný blok, 0 = prázdný)
+    const heroPattern = [
+      [0,1,1,0,0,0],
+      [0,1,1,0,1,0],
+      [0,0,0,0,1,0],
+      [1,1,1,1,1,0],
+      [0,0,0,0,0,0],
+      [0,1,0,0,1,1],
+      [1,1,0,0,0,1],
+      [1,0,0,1,1,1],
+      [0,0,0,0,0,0],
+      [1,1,0,1,0,1],
+    ];
+
+    // Přiřadíme barvy podle sloupce
+    const colColor = BLOCK_COLORS;
+
+    // Vykreslíme hero mřížku
+    const heroGrid = document.getElementById('hero-grid');
+    if (heroGrid) {
+      heroPattern.forEach((row, ri) => {
+        row.forEach((cell, ci) => {
+          const span = document.createElement('span');
+          span.className = 'hero-block';
+          if (cell) {
+            // Vyplněný blok - barva odpovídá sloupci
+            const color = colColor[ci % colColor.length];
+            span.style.background = color;
+            span.style.boxShadow = `0 0 6px ${color}88`;
+          } else {
+            // Prázdný blok - tmavý rámeček (Tetris mřížka)
+            span.style.background = 'rgba(255,255,255,0.02)';
+            span.style.border = '1px solid rgba(255,255,255,0.04)';
+          }
+          heroGrid.appendChild(span);
+        });
+      });
+    }
+
+    // ============================================================
+    // NAČTENÍ A ZOBRAZENÍ SKÓRE
+    // ============================================================
+
+    /**
+     * Načte highscores ze souboru a zobrazí tabulku.
+     * Zvýrazní přihlášeného uživatele zelenou barvou.
+     */
+    function loadScores() {
+      const wrap = document.getElementById('leaderboard-wrap');
+      const currentUser = getCurrentUser();  // Kdo je přihlášen?
+
+      // Zobrazíme hint pokud je uživatel přihlášen
+      const hint = document.getElementById('logged-in-hint');
+      if (currentUser && hint) {
+        hint.style.display = 'flex';
+        document.getElementById('hint-username').textContent = currentUser;
+      }
+
+      // Načteme JSON soubor se skóre
+      fetch('highscores.json')
+        .then(res => {
+          if (!res.ok) throw new Error('Soubor nenalezen');
+          return res.json();
+        })
+        .then(data => {
+          // Seřadíme hráče od nejvyššího skóre, skryjeme interní klíče začínající __
+          const sorted = Object.entries(data)
+            .filter(([name]) => !name.startsWith('__'))
+            .sort((a, b) => b[1] - a[1]);
+
+          // Aktualizujeme statistiky nahoře
+          document.getElementById('stat-players').textContent = sorted.length;
+          document.getElementById('stat-topscore').textContent =
+            sorted.length ? sorted[0][1].toLocaleString() : '0';
+
+          // Počet registrovaných - načteme z API, nebo přímo ze souboru jako fallback
+          fetch('/api/uzivatele')
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+              document.getElementById('stat-registered').textContent =
+                d ? d.pocet : '?';
+            })
+            .catch(() => {
+              fetch('prihlaseni.json')
+                .then(r => r.ok ? r.json() : null)
+                .then(d => {
+                  document.getElementById('stat-registered').textContent =
+                    d && d.uzivatele ? d.uzivatele.length : '?';
+                })
+                .catch(() => {
+                  document.getElementById('stat-registered').textContent = '?';
+                });
+            });
+
+          // Sestavíme HTML tabulky
+          let html = `
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th style="width:60px">Pořadí</th>
+                  <th>Hráč</th>
+                  <th style="text-align:right">Skóre</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          sorted.forEach(([name, score], i) => {
+            // Zkontrolujeme, zda je tento hráč přihlášený uživatel
+            // Porovnáváme bez ohledu na velikost písmen
+            const isMe = currentUser && name.toLowerCase() === currentUser.toLowerCase();
+
+            // Vybereme správný rank badge (zlatý pro #1, atd.)
+            let rankClass = 'rank-n';
+            let rankContent = `#${i + 1}`;
+            if (i === 0) { rankClass = 'rank-1'; rankContent = '🥇'; }
+            else if (i === 1) { rankClass = 'rank-2'; rankContent = '🥈'; }
+            else if (i === 2) { rankClass = 'rank-3'; rankContent = '🥉'; }
+
+            // Zvýraznění pro aktuálního uživatele
+            const rowClass = isMe ? 'current-user' : '';
+            const meTag = isMe
+              ? '<span style="font-size:9px;background:rgba(57,255,20,0.15);border:1px solid rgba(57,255,20,0.4);color:var(--accent-green);padding:1px 5px;border-radius:2px;margin-left:6px;">ty</span>'
+              : '';
+
+            html += `
+              <tr class="${rowClass}">
+                <td style="text-align:center">
+                  <span class="rank-badge ${rankClass}">${rankContent}</span>
+                </td>
+                <td>${escapeHtml(name)}${meTag}</td>
+                <td style="text-align:right">
+                  <span class="score-value ${isMe ? 'current-user' : ''}">
+                    ${score.toLocaleString()}
+                  </span>
+                </td>
+              </tr>
+            `;
+          });
+
+          html += '</tbody></table>';
+          wrap.innerHTML = html;
+        })
+        .catch(() => {
+          // Soubor nenalezen - zobrazíme chybovou zprávu
+          wrap.innerHTML = `
+            <div class="alert alert-info">
+              Soubor highscores.json nebyl nalezen.<br>
+              Ujisti se, že je ve stejné složce jako index.html.
+            </div>
+          `;
+        });
+    }
+
+    /**
+     * Bezpečně escapuje HTML znaky v textu (zabraňuje XSS útokům).
+     * @param {string} text
+     * @returns {string}
+     */
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;    // textContent escapuje HTML automaticky
+      return div.innerHTML;      // Vrátíme bezpečný HTML string
+    }
+
+    // ============================================================
+    // AKTUALIZACE UI PODLE STAVU PŘIHLÁŠENÍ
+    // ============================================================
+
+    /**
+     * Zobrazí správné promo boxy v sidebar podle toho, kdo je přihlášen.
+     */
+    function updateSidebarForUser() {
+      const user = getCurrentUser();
+      const authPromo = document.getElementById('auth-promo');
+      const userPromo = document.getElementById('user-promo');
+      const heroRegBtn = document.getElementById('hero-register-btn');
+
+      if (user) {
+        // Uživatel je přihlášen - skryjeme registrační promo
+        if (authPromo) authPromo.style.display = 'none';
+        if (heroRegBtn) heroRegBtn.style.display = 'none';
+
+        // Zobrazíme user promo s informacemi
+        if (userPromo) {
+          userPromo.style.display = 'block';
+          // Najdeme skóre uživatele
+          document.getElementById('user-promo-body').innerHTML = `
+            <p style="font-size:12px;color:var(--accent-green);margin-bottom:0.75rem;">
+              Přihlášen jako <strong>${escapeHtml(user)}</strong>
+            </p>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:1rem;line-height:1.7;">
+              Tvoje skóre je zvýrazněno v tabulce. Hraj pod stejným jménem a skóre se automaticky aktualizuje.
+            </p>
+            <a href="pages/profile.html" class="btn btn-ghost btn-full" style="margin-bottom:0.5rem;">
+              👤 Můj profil
+            </a>
+            <button class="btn btn-danger btn-full" onclick="logout()">
+              Odhlásit se
+            </button>
+          `;
+        }
+      }
+    }
+
+    // ============================================================
+    // SPUŠTĚNÍ PO NAČTENÍ STRÁNKY
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+      loadScores();           // Načteme tabulku skóre
+      updateSidebarForUser(); // Aktualizujeme sidebar podle přihlášení
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projektová dokumentace - Tetris</title>
+  <style>
+    /* Mega obyčejný design - čistý text na bílém */
+    body {
+      font-family: "Times New Roman", Times, serif;
+      line-height: 1.6;
+      color: #000;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Navbar */
+    nav {
+      border-bottom: 2px solid #000;
+      padding: 10px 0;
+      margin-bottom: 40px;
+    }
+
+    nav a {
+      color: #000;
+      text-decoration: underline;
+      font-weight: bold;
+      margin-right: 20px;
+    }
+
+    /* Typografie */
+    h1 { border-bottom: 3px solid #000; padding-bottom: 10px; margin-top: 50px; }
+    h2 { border-bottom: 1px solid #000; margin-top: 40px; padding-bottom: 5px; }
+    h3 { margin-top: 25px; }
+    hr { border: 0; border-top: 1px double #000; margin: 40px 0; }
+    
+    .slide-box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    table, th, td {
+      border: 1px solid #000;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    .meta-info {
+      font-style: italic;
+      color: #444;
+      margin-bottom: 30px;
+    }
+
+    footer {
+      margin-top: 100px;
+      border-top: 1px solid #000;
+      font-size: 0.8rem;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <nav>
+      <a href="../index.html">← Zpět na Home (index.html)</a>
+    </nav>
+
+    <header>
+      <h1>Komplexní dokumentace projektu Tetris</h1>
+      <p class="meta-info">Verze: 1.0.4 | Datum: 2026 | Autor: Vývojový tým Tetris Ecosystem</p>
+    </header>
+
+    <section>
+      <h2>I. Prezentace pro investory (Struktura 10 slidů)</h2>
+      <p>Následující text představuje obsahovou strukturu prezentace určené pro získání kapitálu na další rozvoj herního portálu.</p>
+
+      <div class="slide-box">
+        <strong>Slide 1: Titulní strana</strong><br>
+        Název: Tetris Ecosystem 2026. Projekt modernizace herní legendy pro webovou generaci. 
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 2: Tržní příležitost</strong><br>
+        Retro hry zažívají renesanci. Naším cílem je zachytit segment "pauzových hráčů" (office workers, studenti), kteří hledají okamžitou hratelnost bez instalace složitého softwaru.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 3: Technické řešení</strong><br>
+        Kombinace robustního Python enginu (Pygame) a moderního webového rozhraní (HTML5/JS). Tato hybridní architektura umožňuje plynulost desktopové aplikace s komunitním dosahem webu.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 4: Unikátní ekosystém</strong><br>
+        Nejsme jen hra. Jsme platforma s registrací, profily, historií výkonů a globálním žebříčkem. Hráč má identitu, za kterou bojuje.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 5: Demonstrace produktu</strong><br>
+        Podpora více rozlišení (od 480p po 1080p), podpora Fullscreen režimu a plynulý běh na 60 FPS s minimálními nároky na hardware.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 6: Monetizační model</strong><br>
+        Plánované zpoplatnění skrze prémiové skiny kostiček, odstranění budoucích reklam a možnost pořádání sponzorovaných turnajů o reálné ceny.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 7: Uživatelské statistiky</strong><br>
+        Průměrná doba relace u testerů je 15 minut. Vysoká míra retence díky "stíhání" hráčů nad sebou v žebříčku.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 8: Škálovatelnost</strong><br>
+        Možnost snadného portování na mobilní platformy a integrace s cloudovými databázemi (Firebase/AWS) pro obsluhu miliónů požadavků měsíčně.
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 9: Roadmapa (Q3 2026 - Q1 2027)</strong><br>
+        Implementace multiplayeru (1vs1), mobilní aplikace a systému achievementů (odznaků za zásluhy).
+      </div>
+
+      <div class="slide-box">
+        <strong>Slide 10: Závěrečná výzva (The Ask)</strong><br>
+        Hledáme investici na marketing, pronájem serverové infrastruktury a rozšíření vývojového týmu o seniorního backend vývojáře.
+      </div>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>II. Uživatelský manuál (Příručka hráče)</h2>
+      <p>Tento dokument slouží k rychlé orientaci koncového uživatele v ovládání a funkcích hry.</p>
+      
+      <h3>1. Instalace a spuštění</h3>
+      <p>Pro hraní je vyžadován Python verze 3.8+ a nainstalovaná knihovna Pygame. Hru spustíte příkazem: <code>python tetris.py</code>. Webovou část si prohlédnete otevřením souboru <code>index.html</code> v libovolném moderním prohlížeči.</p>
+
+      <h3>2. Registrace a profil</h3>
+      <ul>
+        <li>Navštivte sekci <strong>Registrace</strong> na webu.</li>
+        <li>Po přihlášení v sekci <strong>Profil</strong> uvidíte své unikátní statistiky.</li>
+        <li>Poznámka: Pro správné zobrazení v žebříčku musíte v herním okně po skončení hry zadat stejné jméno, pod kterým jste registrováni na webu.</li>
+      </ul>
+
+      <h3>3. Ovládání hry</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Klávesa</th>
+            <th>Akce ve hře</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Šipka Vlevo / Vpravo</td><td>Pohyb kostičky do stran</td></tr>
+          <tr><td>Šipka Nahoru</td><td>Rotace kostičky o 90° ve směru hodinových ručiček</td></tr>
+          <tr><td>Šipka Dolů</td><td>Zrychlený pád (Soft Drop)</td></tr>
+          <tr><td>Mezerník</td><td>Okamžitý pád na dno (Hard Drop)</td></tr>
+          <tr><td>Klávesa P</td><td>Pauza / Pokračovat</td></tr>
+          <tr><td>Klávesa Esc</td><td>Návrat do menu</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>III. Dokumentace vývoje (Development Log)</h2>
+      <p>Tato část detailně popisuje, jak byl projekt konstruován a jaká rozhodnutí byla učiněna během vývoje.</p>
+
+      <h3>1. Architektura herního jádra</h3>
+      <p>Hra je postavena na objektově orientovaném přístupu. Základem je třída <code>Piece</code>, která uchovává informace o tvaru, barvě, pozici a aktuální rotaci. Tvary jsou definovány jako seznamy seznamů (matice), což umožňuje snadnou matematickou rotaci.</p>
+
+      <h3>2. Webový frontend a UI/UX</h3>
+      <p>Web byl vytvořen s důrazem na tzv. "Cyberpunk-Retro" estetiku. Kód využívá moderní CSS vlastnosti jako <code>backdrop-filter: blur()</code> pro skleněné efekty a <code>flexbox/grid</code> pro responzivitu. Žebříček je generován dynamicky pomocí JavaScriptu, který parsuje data ze souboru <code>highscores.json</code>.</p>
+
+      <h3>3. Datová integrace</h3>
+      <p>Propojení mezi Pythonem a Webem probíhá přes souborový systém. Python po každé hře aktualizuje <code>highscores.json</code>. Webový frontend tento soubor načítá při každém zobrazení žebříčku, čímž je zajištěna aktuálnost dat bez nutnosti běžícího databázového serveru v této fázi prototypu.</p>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>IV. Dokument pro spolupracovníka (Onboarding)</h2>
+      <p>Určeno pro nové vývojáře vstupující do projektu za účelem úpravy kódu nebo přidávání funkcí.</p>
+
+      <h3>1. Struktura souborů</h3>
+      <ul>
+        <li><code>tetris.py</code>: Obsahuje veškerou herní logiku, vykreslování a práci se vstupy.</li>
+        <li><code>style.css</code>: Centrální úložiště stylů. Pokud měníš barvu brandu, změň proměnné v <code>:root</code>.</li>
+        <li><code>auth.js</code>: Simulace autentizačního systému (ukládá uživatele do localStorage).</li>
+      </ul>
+
+      <h3>2. Klíčové funkce k úpravě</h3>
+      <p>Pokud chceš měnit herní obtížnost, zaměř se na funkci <code>play_game</code> v Pythonu, konkrétně na proměnnou <code>fall_speed</code>. Pokud chceš přidat nový typ kostičky, stačí ji definovat v seznamu <code>SHAPES</code> na začátku souboru.</p>
+
+      <h3>3. Známé limity a TODO</h3>
+      <ul>
+        <li>Hra zatím nepodporuje zvuky (plánováno přidání <code>pygame.mixer</code>).</li>
+        <li>Webový žebříček je v současnosti omezen na lokální soubor – pro produkci bude nutné přejít na REST API.</li>
+        <li>Registrace je pouze na úrovni prohlížeče (localStorage), neukládá se na server.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>&copy; 2026 Tetris Project. Všechna práva vyhrazena. Pouze pro interní potřeby.</p>
+    </footer>
+  </div>
+
+</body>
+</html>

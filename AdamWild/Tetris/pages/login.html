@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Přihlášení</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Stránka přihlášení - vycentrovaný formulář */
+    .auth-page {
+      min-height: calc(100vh - 60px);   /* Výška mínus navigace */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* Kontejner formuláře */
+    .auth-box {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* Logo nad formulářem */
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    /* Pixel nadpis */
+    .auth-logo h1 {
+      font-family: var(--font-pixel);
+      font-size: 20px;
+      color: var(--accent-cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Podtitulek */
+    .auth-logo p {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Formulářová karta */
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+    }
+
+    /* Odkaz pod formulářem */
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Odkaz na registraci */
+    .auth-footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigace -->
+  <nav class="navbar" id="navbar"></nav>
+
+  <div class="auth-page">
+    <div class="auth-box anim-fadeup">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <h1>[ LOGIN ]</h1>
+        <p>Přihlas se ke svému účtu</p>
+      </div>
+
+      <!-- Formulář -->
+      <div class="auth-card">
+
+        <!-- Zpráva o výsledku (chyba nebo úspěch) -->
+        <div id="msg" style="display:none;"></div>
+
+        <!-- Pole pro uživatelské jméno -->
+        <div class="form-group">
+          <label for="username">Uživatelské jméno</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="Zadej jméno..."
+            autocomplete="username"
+            maxlength="16"
+          >
+        </div>
+
+        <!-- Pole pro heslo -->
+        <div class="form-group">
+          <label for="password">Heslo</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Zadej heslo..."
+            autocomplete="current-password"
+          >
+        </div>
+
+        <!-- Tlačítko přihlásit -->
+        <button class="btn btn-primary btn-full btn-lg" id="login-btn" onclick="doLogin()">
+          ▶ Přihlásit se
+        </button>
+      </div>
+
+      <!-- Odkaz na registraci -->
+      <p class="auth-footer">
+        Ještě nemáš účet?
+        <a href="register.html">Zaregistruj se</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    // Pokud je uživatel již přihlášen, přesměrujeme ho na home
+    document.addEventListener('DOMContentLoaded', function() {
+      if (getCurrentUser()) {
+        window.location.href = '../index.html';  // Přesměrujeme na home
+      }
+    });
+
+    /**
+     * Zpracuje kliknutí na tlačítko přihlásit.
+     * Načte hodnoty z formuláře, zavolá login() z auth.js a zobrazí výsledek.
+     */
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      const msgEl = document.getElementById('msg');
+      msgEl.style.display = 'block';
+      msgEl.className = 'alert alert-info';
+      msgEl.textContent = 'Ověřuji...';
+
+      const result = await login(username, password);  // async - čte ze souboru
+
+      if (result.success) {
+        msgEl.className = 'alert alert-success';
+        msgEl.textContent = result.message;
+        setTimeout(() => {
+          window.location.href = '../index.html';
+        }, 1000);
+      } else {
+        msgEl.className = 'alert alert-error';
+        msgEl.textContent = result.message;
+      }
+    }
+
+    // Umožníme odeslání formuláře klávesou Enter
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Profil</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Profilová stránka */
+
+    /* Avatar - velký pixel blok s iniciálou */
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 6px;
+      background: rgba(0,245,255,0.1);
+      border: 2px solid var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-pixel);
+      font-size: 28px;
+      color: var(--accent-cyan);
+      text-shadow: var(--glow-cyan);
+      box-shadow: var(--glow-cyan);
+      flex-shrink: 0;
+    }
+
+    /* Profilová hlavička */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .profile-info h2 {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--accent-cyan);
+      margin-bottom: 0.3rem;
+    }
+
+    .profile-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Stat karta */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-family: var(--font-pixel);
+      font-size: 20px;
+      color: var(--accent-cyan);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-card .label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar"></nav>
+
+  <div class="container page-content">
+    <div class="page-header anim-fadeup">
+      <h1>👤 PROFIL</h1>
+      <p>Tvůj účet a herní statistiky</p>
+    </div>
+
+    <!-- Obsah profilu (vloží JavaScript) -->
+    <div id="profile-content">
+      <p style="color:var(--text-muted);font-size:12px;">Načítání...</p>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = getCurrentUser();
+
+      // Pokud není přihlášen, přesměrujeme na login
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      loadProfile(user);  // Načteme a zobrazíme profil
+    });
+
+    /**
+     * Načte profilová data a skóre ze hry, zobrazí je.
+     * @param {string} username - jméno přihlášeného uživatele
+     */
+    function loadProfile(username) {
+      // Nejprve zobrazíme základní info z localStorage
+      const users = getUsers();
+      const userData = users.find(u => u.username === username);
+      const registeredAt = userData
+        ? new Date(userData.registeredAt).toLocaleDateString('cs-CZ')
+        : 'neznámo';
+
+      // Pak načteme skóre z JSON souboru
+      fetch('../highscores.json')
+        .then(res => res.ok ? res.json() : {})
+        .catch(() => ({}))
+        .then(scores => {
+          // Najdeme skóre tohoto hráče (bez ohledu na velikost písmen)
+          const myScore = Object.entries(scores).find(
+            ([name]) => name.toLowerCase() === username.toLowerCase()
+          );
+
+          const score = myScore ? myScore[1] : null;
+
+          // Zjistíme pořadí v žebříčku
+          const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+          const rank = sorted.findIndex(
+            ([name]) => name.toLowerCase() === username.toLowerCase()
+          );
+
+          renderProfile(username, score, rank, registeredAt);
+        });
+    }
+
+    /**
+     * Vykreslí HTML profilu.
+     */
+    function renderProfile(username, score, rank, registeredAt) {
+      const initial = username.charAt(0).toUpperCase();  // První písmeno pro avatar
+
+      document.getElementById('profile-content').innerHTML = `
+        <!-- Profilová hlavička -->
+        <div class="card anim-fadeup" style="margin-bottom:1.5rem;">
+          <div class="profile-header">
+            <div class="avatar">${initial}</div>
+            <div class="profile-info">
+              <h2>${escapeHtml(username)}</h2>
+              <p>Registrován: ${registeredAt}</p>
+              ${rank >= 0
+                ? `<p style="color:var(--accent-green);margin-top:0.3rem;">
+                     ● Pořadí v žebříčku: <strong>#${rank + 1}</strong>
+                   </p>`
+                : `<p style="color:var(--text-muted);margin-top:0.3rem;">
+                     Zatím nejsi v žebříčku. Zahraj hru!
+                   </p>`
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistiky -->
+        <div class="grid-3 anim-fadeup" style="animation-delay:0.1s;margin-bottom:1.5rem;">
+          <div class="stat-card">
+            <span class="value">${score !== null ? score.toLocaleString() : '—'}</span>
+            <span class="label">Max skóre</span>
+          </div>
+          <div class="stat-card">
+            <span class="value">${rank >= 0 ? '#' + (rank + 1) : '—'}</span>
+            <span class="label">Pořadí</span>
+          </div>
+          <div class="stat-card">
+            <span class="value">${score !== null ? Math.floor(score / 100) : '—'}</span>
+            <span class="label">Smazaných řádků</span>
+          </div>
+        </div>
+
+        <!-- Informace o propojení se hrou -->
+        <div class="card anim-fadeup" style="animation-delay:0.2s;margin-bottom:1.5rem;">
+          <div class="card-title">🎮 Propojení se hrou</div>
+          <div class="alert alert-info" style="margin-bottom:0;">
+            Hraj Tetris pod jménem <strong>${escapeHtml(username)}</strong> a tvoje skóre
+            se automaticky zobrazí v žebříčku a bude zvýrazněno zeleně.
+          </div>
+        </div>
+
+        <!-- Akce -->
+        <div class="card anim-fadeup" style="animation-delay:0.3s;">
+          <div class="card-title">⚙ Nastavení účtu</div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <a href="leaderboard.html" class="btn btn-primary">
+              🏆 Zobrazit žebříček
+            </a>
+            <button class="btn btn-danger" onclick="doLogout()">
+              Odhlásit se
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function doLogout() {
+      logout();  // Funkce z auth.js - odhlásí a přesměruje
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

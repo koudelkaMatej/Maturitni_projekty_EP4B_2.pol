@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Žebříček</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Stránka žebříčku */
+
+    /* Podium top 3 hráčů */
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 2rem 0 2.5rem;
+    }
+
+    /* Jeden sloupec podia */
+    .podium-item {
+      flex: 1;
+      max-width: 180px;
+      text-align: center;
+    }
+
+    /* Jméno hráče nad sloupcem */
+    .podium-name {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      margin-bottom: 0.4rem;
+      word-break: break-all;
+    }
+
+    /* Skóre nad sloupcem */
+    .podium-score {
+      font-size: 11px;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    /* Barevný sloupec */
+    .podium-bar {
+      border-radius: 3px 3px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    /* Výšky sloupců podia */
+    .podium-1 .podium-bar { height: 90px;  background: rgba(255,230,0,0.15);  border: 1px solid var(--accent-yellow); }
+    .podium-2 .podium-bar { height: 65px;  background: rgba(180,180,180,0.08); border: 1px solid #555577; }
+    .podium-3 .podium-bar { height: 45px;  background: rgba(255,120,60,0.08);  border: 1px solid #664422; }
+
+    /* Zvýraznění prvního místa */
+    .podium-1 .podium-name { color: var(--accent-yellow); text-shadow: 0 0 10px #ffe60066; }
+    .podium-2 .podium-name { color: #b0b0c0; }
+    .podium-3 .podium-name { color: #ff7840; }
+
+    /* Filtr / vyhledávání */
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Vyhledávací pole */
+    .search-input {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.85rem;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      outline: none;
+      flex: 1;
+      min-width: 180px;
+      transition: border-color var(--transition);
+    }
+    .search-input:focus { border-color: var(--accent-cyan); }
+
+    /* Počet hráčů */
+    .player-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Aktualizace čas */
+    .last-updated {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar"></nav>
+
+  <div class="container page-content">
+
+    <!-- Nadpis stránky -->
+    <div class="page-header anim-fadeup">
+      <h1>🏆 ŽEBŘÍČEK</h1>
+      <p>Nejlepší hráči — seřazeni podle skóre</p>
+    </div>
+
+    <!-- Podium top 3 -->
+    <div class="podium anim-fadeup" id="podium" style="animation-delay:0.1s">
+      <!-- Vloží JavaScript -->
+    </div>
+
+    <!-- Hlavní tabulka -->
+    <div class="card anim-fadeup" style="animation-delay:0.2s">
+
+      <!-- Toolbar s vyhledáváním -->
+      <div class="table-toolbar">
+        <input
+          type="text"
+          class="search-input"
+          id="search"
+          placeholder="🔍 Hledat hráče..."
+          oninput="filterTable()"
+        >
+        <span class="player-count" id="player-count"></span>
+        <button class="btn btn-ghost" onclick="loadScores()" style="font-size:11px;">
+          ↻ Obnovit
+        </button>
+      </div>
+
+      <!-- Tabulka -->
+      <div id="table-wrap">
+        <p style="color:var(--text-muted);font-size:12px;text-align:center;padding:2rem;">
+          Načítání...
+        </p>
+      </div>
+
+      <!-- Čas poslední aktualizace -->
+      <div class="last-updated" id="last-updated"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <span style="color:var(--text-muted);">© 2024 Tetris Web</span>
+    </div>
+  </footer>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+
+    let allScores = [];  // Ukládáme všechna skóre - potřebujeme pro filtrování
+
+    /**
+     * Načte highscores.json a zobrazí data.
+     */
+    function loadScores() {
+      fetch('../highscores.json')
+        .then(res => {
+          if (!res.ok) throw new Error('Soubor nenalezen');
+          return res.json();
+        })
+        .then(data => {
+          // Seřadíme sestupně podle skóre
+          allScores = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+          renderPodium(allScores);  // Nakreslíme podium
+          renderTable(allScores);   // Nakreslíme tabulku
+
+          // Aktualizujeme čas
+          const now = new Date();
+          document.getElementById('last-updated').textContent =
+            `Aktualizováno: ${now.toLocaleTimeString('cs-CZ')}`;
+        })
+        .catch(() => {
+          document.getElementById('table-wrap').innerHTML = `
+            <div class="alert alert-info">
+              highscores.json nenalezen. Ujisti se, že je soubor ve složce nad /pages/.
+            </div>
+          `;
+        });
+    }
+
+    /**
+     * Vykreslí podium (top 3 hráčů).
+     * @param {Array} scores - seřazené pole [jmeno, skore]
+     */
+    function renderPodium(scores) {
+      const podium = document.getElementById('podium');
+      if (!scores.length) { podium.style.display = 'none'; return; }
+
+      // Pořadí prvků v podium: 2. místo vlevo, 1. uprostřed, 3. vpravo
+      const order = [scores[1], scores[0], scores[2]];
+      const classes = ['podium-2', 'podium-1', 'podium-3'];
+      const emojis = ['🥈', '🥇', '🥉'];
+
+      const currentUser = getCurrentUser();
+
+      podium.innerHTML = order.map((entry, i) => {
+        if (!entry) return '<div style="flex:1"></div>';  // Pokud není 2. nebo 3. místo
+
+        const [name, score] = entry;
+        const isMe = currentUser && name.toLowerCase() === currentUser.toLowerCase();
+        const highlight = isMe ? 'text-shadow:var(--glow-green);color:var(--accent-green)!important;' : '';
+
+        return `
+          <div class="podium-item ${classes[i]}">
+            <div class="podium-name" style="${highlight}">${escapeHtml(name)}</div>
+            <div class="podium-score">${score.toLocaleString()}</div>
+            <div class="podium-bar">${emojis[i]}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * Vykreslí celou tabulku. Volá se i při filtrování.
+     * @param {Array} scores - seřazené pole [jmeno, skore]
+     */
+    function renderTable(scores) {
+      const wrap = document.getElementById('table-wrap');
+      const currentUser = getCurrentUser();
+
+      // Aktualizujeme počítadlo hráčů
+      document.getElementById('player-count').textContent =
+        `${scores.length} hráčů`;
+
+      if (!scores.length) {
+        wrap.innerHTML = `
+          <p style="color:var(--text-muted);font-size:12px;text-align:center;padding:2rem;">
+            Žádní hráči nenalezeni.
+          </p>
+        `;
+        return;
+      }
+
+      let html = `
+        <table class="score-table">
+          <thead>
+            <tr>
+              <th style="width:70px">Pořadí</th>
+              <th>Hráč</th>
+              <th style="text-align:right">Skóre</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      scores.forEach(([name, score], i) => {
+        const isMe = currentUser && name.toLowerCase() === currentUser.toLowerCase();
+
+        // Rank badge
+        let rankClass = 'rank-n', rankContent = `#${i + 1}`;
+        if (i === 0) { rankClass = 'rank-1'; rankContent = '🥇'; }
+        else if (i === 1) { rankClass = 'rank-2'; rankContent = '🥈'; }
+        else if (i === 2) { rankClass = 'rank-3'; rankContent = '🥉'; }
+
+        const rowClass = isMe ? 'current-user' : '';
+        const meTag = isMe
+          ? `<span style="font-size:9px;background:rgba(57,255,20,0.15);border:1px solid rgba(57,255,20,0.4);color:var(--accent-green);padding:1px 5px;border-radius:2px;margin-left:6px;">ty</span>`
+          : '';
+
+        html += `
+          <tr class="${rowClass}">
+            <td style="text-align:center">
+              <span class="rank-badge ${rankClass}">${rankContent}</span>
+            </td>
+            <td>${escapeHtml(name)}${meTag}</td>
+            <td style="text-align:right">
+              <span class="score-value ${isMe ? 'current-user' : ''}">
+                ${score.toLocaleString()}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    }
+
+    /**
+     * Filtruje tabulku podle hledaného textu.
+     * Volá se při každém stisku klávesy ve vyhledávacím poli.
+     */
+    function filterTable() {
+      const query = document.getElementById('search').value.toLowerCase();
+      // Filtrujeme z allScores - zachováme původní pořadí (rank)
+      const filtered = allScores.filter(([name]) => name.toLowerCase().includes(query));
+      renderTable(filtered);
+    }
+
+    /**
+     * Bezpečné escapování HTML.
+     */
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Načteme skóre při startu
+    document.addEventListener('DOMContentLoaded', loadScores);
+  </script>
+</body>
+</html>

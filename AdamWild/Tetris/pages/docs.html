@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Dokumentace</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Dokumentační stránka */
+
+    /* Dvousloupcový layout: sidebar s obsahem + hlavní text */
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* Levý sidebar - navigace dokumentace */
+    .docs-nav {
+      position: sticky;          /* Zůstane viditelný při scrollování */
+      top: 80px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* Nadpis sekce v docs nav */
+    .docs-nav-section {
+      padding: 0.5rem 0.9rem;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* Odkaz v docs nav */
+    .docs-nav a {
+      display: block;
+      padding: 0.55rem 0.9rem;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all var(--transition);
+    }
+    .docs-nav a:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.02);
+    }
+    .docs-nav a.active {
+      color: var(--accent-cyan);
+      border-left-color: var(--accent-cyan);
+      background: rgba(0,245,255,0.04);
+    }
+
+    /* Hlavní dokumentační obsah */
+    .docs-content {
+      min-height: 600px;
+    }
+
+    /* Sekce dokumentace */
+    .docs-section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 80px;  /* Offset pro sticky navigaci */
+    }
+
+    /* Nadpis sekce */
+    .docs-section h2 {
+      font-family: var(--font-pixel);
+      font-size: 13px;
+      color: var(--accent-cyan);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Nadpis podsekce */
+    .docs-section h3 {
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      color: var(--accent-green);
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    /* Odstavec */
+    .docs-section p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Inline kód */
+    .docs-section code {
+      background: rgba(0,245,255,0.08);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-cyan);
+    }
+
+    /* Blok kódu */
+    .docs-section pre {
+      background: #0a0a12;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      overflow-x: auto;        /* Horizontální scroll pro dlouhé řádky */
+      margin: 0.75rem 0 1rem;
+    }
+    .docs-section pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 12px;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    /* Tabulka v dokumentaci */
+    .docs-section table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0 1rem;
+      font-size: 12px;
+    }
+    .docs-section table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .docs-section table td {
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid rgba(30,30,48,0.5);
+      color: var(--text-muted);
+    }
+    .docs-section table td:first-child {
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+    }
+
+    /* Výzva / note box */
+    .docs-note {
+      background: rgba(255,230,0,0.05);
+      border: 1px solid rgba(255,230,0,0.2);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      font-size: 12px;
+      color: #d4b800;
+    }
+
+    /* Badge pro "TODO" sekce */
+    .todo-badge {
+      display: inline-block;
+      background: rgba(255,45,85,0.1);
+      border: 1px solid rgba(255,45,85,0.3);
+      border-radius: 3px;
+      padding: 0.2rem 0.5rem;
+      font-size: 9px;
+      color: var(--accent-red);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .docs-nav { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar"></nav>
+
+  <div class="container page-content">
+    <div class="page-header anim-fadeup">
+      <h1>📖 DOKUMENTACE</h1>
+      <p>Popis hry, kódu a webového systému</p>
+    </div>
+
+    <div class="docs-layout anim-fadeup" style="animation-delay:0.1s">
+
+      <nav class="docs-nav">
+        <div class="docs-nav-section">Hra</div>
+        <a href="#overview" class="active" onclick="setActive(this)">Přehled</a>
+        <a href="#controls" onclick="setActive(this)">Ovládání</a>
+        <a href="#scoring" onclick="setActive(this)">Bodování</a>
+        <a href="#modes" onclick="setActive(this)">Herní módy</a>
+
+        <div class="docs-nav-section">Kód hry</div>
+        <a href="#code-structure" onclick="setActive(this)">Struktura</a>
+        <a href="#code-pieces" onclick="setActive(this)">Kostičky</a>
+        <a href="#code-grid" onclick="setActive(this)">Herní mřížka</a>
+        <a href="#code-highscore" onclick="setActive(this)">Highscores</a>
+        <a href="#flowchart" onclick="setActive(this)">Vývojový diagram</a>
+
+        <div class="docs-nav-section">Web systém</div>
+        <a href="#web-overview" onclick="setActive(this)">Přehled webu</a>
+        <a href="#web-auth" onclick="setActive(this)">Autentizace</a>
+        <a href="#web-files" onclick="setActive(this)">Soubory</a>
+
+        <div class="docs-nav-section">Prezentace</div>
+        <a href="#todo" onclick="setActive(this)">Prezentace</a>
+      </nav>
+
+      <main class="docs-content">
+
+        <section class="docs-section" id="overview">
+          <h2>Přehled hry</h2>
+          <p>
+            Tetris je klasická arkádová puzzle hra z roku 1984. Cílem je skládat padající
+            kostičky (tzv. <em>tetromina</em>) tak, aby tvořily plné vodorovné řádky.
+            Každý dokončený řádek zmizí a hráč získá body. Hra končí, když kostičky
+            dosáhnou vrcholu hrací plochy.
+          </p>
+          <p>
+            Tato implementace je napsána v Pythonu s využitím knihovny <code>pygame</code>.
+            Obsahuje dva herní módy, animace, online i offline ukládání highscores
+            a přizpůsobení rozlišení obrazovky.
+          </p>
+          <div class="docs-note">
+            💡 <strong>Tip:</strong> Hraj pod stejným jménem jako tvůj účet na webu —
+            tvoje skóre se automaticky zobrazí v žebříčku a bude zvýrazněno.
+          </div>
+        </section>
+
+        <section class="docs-section" id="controls">
+          <h2>Ovládání</h2>
+          <table>
+            <thead>
+              <tr><th>Klávesa</th><th>Akce</th><th>Mód</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>← / A</td><td>Pohyb doleva</td><td>Oba</td></tr>
+              <tr><td>→ / D</td><td>Pohyb doprava</td><td>Oba</td></tr>
+              <tr><td>R</td><td>Rotace kostičky o 90°</td><td>Oba</td></tr>
+              <tr><td>↓ / S</td><td>Soft drop (rychlejší pád)</td><td>Normal</td></tr>
+              <tr><td>↓</td><td>Hard drop (okamžitý pád)</td><td>Hard</td></tr>
+              <tr><td>Mezerník</td><td>Hard drop (okamžitý pád)</td><td>Oba</td></tr>
+              <tr><td>ESC</td><td>Pauza / pokračování</td><td>Oba</td></tr>
+              <tr><td>M</td><td>Zpět do menu (při pauze)</td><td>Oba</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="docs-section" id="scoring">
+          <h2>Bodování</h2>
+          <p>
+            Každý smazaný řádek přidá <code>100 bodů</code>. Pokud smažeš více řádků
+            najednou, dostaneš bonus za každý z nich.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Akce</th><th>Body</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1 řádek</td><td>100</td></tr>
+              <tr><td>2 řádky najednou</td><td>200</td></tr>
+              <tr><td>3 řádky najednou</td><td>300</td></tr>
+              <tr><td>4 řádky najednou (Tetris)</td><td>400</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="docs-section" id="modes">
+          <h2>Herní módy</h2>
+          <h3>Normal</h3>
+          <p>Klasický mód. Kostičky padají normální rychlostí.</p>
+          <h3>Hard</h3>
+          <p>Těžší mód. Kostičky padají rychleji od začátku.</p>
+        </section>
+
+        <section class="docs-section" id="code-structure">
+          <h2>Struktura kódu hry</h2>
+          <p>Celá hra je v jednom souboru <code>tetris.py</code>.</p>
+        </section>
+
+        <section class="docs-section" id="code-pieces">
+          <h2>Kostičky (Piece)</h2>
+          <pre><code># Příklad: kostička I
+SHAPES = [[[1, 1, 1, 1]]]</code></pre>
+        </section>
+
+        <section class="docs-section" id="code-grid">
+          <h2>Herní mřížka</h2>
+          <p>Hrací plocha je seznam 20 řádků po 10 barvách.</p>
+        </section>
+
+        <section class="docs-section" id="code-highscore">
+          <h2>Systém highscores</h2>
+          <p>Skóre se ukládají do souboru <code>highscores.json</code>.</p>
+        </section>
+
+        <section class="docs-section" id="flowchart">
+          <h2>Vývojový diagram</h2>
+          <p>
+            Tento diagram zobrazuje logický průběh hry, od inicializace až po herní smyčku a kontrolu konce hry (Game Over).
+          </p>
+          <div style="margin-top: 1.5rem; text-align: center;">
+            <a href="../images/diagram.png" target="_blank">
+              <img src="../images/diagram.png" alt="Vývojový diagram" style="max-width: 100%; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: transform 0.2s;">
+            </a>
+            <p style="font-size: 11px; margin-top: 0.5rem; color: var(--accent-cyan);">
+              (Kliknutím na obrázek jej otevřete v plné velikosti)
+            </p>
+          </div>
+        </section>
+
+        <section class="docs-section" id="web-overview">
+          <h2>Přehled webového systému</h2>
+          <p>Web je statický a využívá <code>localStorage</code> prohlížeče.</p>
+        </section>
+
+        <section class="docs-section" id="web-auth">
+          <h2>Systém autentizace</h2>
+          <p>Soubor <code>js/auth.js</code> implementuje celý auth systém.</p>
+        </section>
+
+        <section class="docs-section" id="web-files">
+          <h2>Struktura souborů</h2>
+          <pre><code>tetris-web/
+├── index.html
+├── images/
+│   └── diagram.png
+└── ...</code></pre>
+        </section>
+
+        <section class="docs-section" id="todo">
+          <h2>Prezentace <span class="todo-badge">Prezentace</span></h2>
+          <p>Odkaz na prezentaci projektu:</p>
+          <div class="docs-note">
+            <a href="../pages/prezentace.html" style="color: var(--accent-cyan); font-weight: bold; text-decoration: none;">➔ Otevřít prezentaci</a>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <span style="color:var(--text-muted);">© 2026 Tetris </span>
+    </div>
+  </footer>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    function setActive(el) {
+      document.querySelectorAll('.docs-nav a').forEach(a => a.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    window.addEventListener('scroll', function() {
+      const sections = document.querySelectorAll('.docs-section');
+      const links = document.querySelectorAll('.docs-nav a');
+      let current = '';
+      sections.forEach(sec => {
+        const top = sec.getBoundingClientRect().top;
+        if (top < 120) current = sec.id;
+      });
+      links.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
