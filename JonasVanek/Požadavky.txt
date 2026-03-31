@@ -1,1 +1,3 @@
 Poprosím o stažení XAMPP na počítač
+PyCharm
+Visual stuido code
