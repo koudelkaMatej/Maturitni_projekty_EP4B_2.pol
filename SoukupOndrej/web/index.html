@@ -1,0 +1,622 @@
+<!doctype html> <!-- Říká prohlížeči, že tento dokument je napsaný v HTML5. -->
+<html lang="cs"> <!-- Začátek celé HTML stránky. Atribut lang="cs" říká, že jazyk stránky je čeština. -->
+
+<head> <!-- Hlavička stránky. Sem patří informace pro prohlížeč, ale ne přímo viditelný obsah stránky. -->
+  <meta charset="utf-8" /> <!-- Nastaví kódování znaků na UTF-8, aby správně fungovala čeština a speciální znaky. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- Zajistí správné zobrazení stránky na mobilu a tabletu. -->
+  <title>Flappy Bird – Žebříček</title> <!-- Text, který se zobrazí v záložce prohlížeče. -->
+
+  <style> /* Začátek CSS stylů. CSS určuje vzhled stránky – barvy, velikosti, mezery, rozložení. */
+
+    :root{ /* :root je kořen dokumentu. Často se sem dávají globální proměnné pro celý web. */
+      --bg:#0b1220; /* Hlavní tmavá barva pozadí stránky. */
+      --bg2:#0e1730; /* Druhá tmavá barva pozadí – používá se v přechodu. */
+      --card:rgba(255,255,255,.06); /* Poloprůhledná barva pro karty. */
+      --border:rgba(255,255,255,.12); /* Jemná světlá barva pro rámečky. */
+      --text:#e9f0ff; /* Hlavní světlá barva textu. */
+      --muted:rgba(233,240,255,.72); /* Méně výrazná barva textu pro doplňující informace. */
+      --accent:#00ffd5; /* Tyrkysová zvýrazňovací barva. */
+      --accent2:#1e6cff; /* Modrá zvýrazňovací barva. */
+      --shadow: 0 12px 40px rgba(0,0,0,.35); /* Stín pod kartami a tlačítky. */
+      --danger:#ff4d6d; /* Barva pro chyby. */
+      --ok:#44ff9a; /* Barva pro úspěšné zprávy. */
+    }
+
+    *{box-sizing:border-box} /* U všech prvků nastaví, že padding a border se započítávají do celkové velikosti prvku. */
+    html,body{height:100%} /* Nastaví HTML i body na plnou výšku okna. */
+
+    body{
+      margin:0; /* Odstraní výchozí bílé okraje stránky. */
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; /* Nastaví písmo. Prohlížeč vybere první dostupné. */
+      color:var(--text); /* Základní barva textu bude ta uložená v proměnné --text. */
+      background:
+        radial-gradient(900px 500px at 20% 0%, rgba(0,255,213,.14), transparent 55%), /* Barevný světelný efekt vlevo nahoře. */
+        radial-gradient(900px 500px at 90% 10%, rgba(30,108,255,.18), transparent 55%), /* Druhý světelný efekt vpravo nahoře. */
+        linear-gradient(180deg, var(--bg), var(--bg2)); /* Hlavní přechod pozadí shora dolů. */
+    }
+
+    .container{max-width:1100px;margin:0 auto;padding:0 18px} /* Obsah stránky zarovná doprostřed, omezí šířku a přidá odsazení po stranách. */
+
+    /* topbar = horní lišta stránky */
+    .topbar{
+      position:sticky;top:0;z-index:20; /* Lišta zůstává přilepená nahoře i při scrollování. */
+      backdrop-filter: blur(10px); /* Rozmaže obsah pod lištou – moderní efekt „skla“. */
+      background: rgba(11,18,32,.70); /* Poloprůhledné tmavé pozadí lišty. */
+      border-bottom:1px solid var(--border); /* Tenká spodní čára oddělí lištu od zbytku stránky. */
+    }
+
+    .topbar__inner{
+      display:flex; /* Použije flexbox – prvky budou vedle sebe. */
+      align-items:center; /* Vertikálně je zarovná na střed. */
+      justify-content:space-between; /* Jeden blok dá vlevo, druhý vpravo. */
+      padding:14px 0; /* Odsazení nahoře a dole. */
+      gap:12px; /* Mezery mezi prvky. */
+    }
+
+    .brand{display:flex;align-items:center;gap:12px} /* Logo a text značky budou vedle sebe. */
+
+    .brand__logo{
+      width:42px;height:42px;border-radius:14px; /* Rozměr loga a zaoblení rohů. */
+      display:grid;place-items:center; /* Obsah loga (emoji) vycentruje doprostřed. */
+      background: rgba(255,255,255,.08); /* Jemné pozadí loga. */
+      border:1px solid var(--border); /* Jemný rámeček. */
+      box-shadow: var(--shadow); /* Stín pod logem. */
+      font-size:18px; /* Velikost emoji. */
+    }
+
+    .brand__title{font-weight:900;letter-spacing:.02em} /* Hlavní název bude hodně tučný a lehce roztažený. */
+    .brand__sub{font-size:12px;color:var(--muted)} /* Menší doplňující text pod názvem. */
+
+    .nav{
+      display:flex; /* Odkazy budou vedle sebe. */
+      gap:14px; /* Mezery mezi odkazy. */
+      align-items:center; /* Zarovnání na střed. */
+      flex-wrap:wrap; /* Když není místo, odkazy se zalomí na další řádek. */
+    }
+
+    .nav a{
+      color:var(--text); /* Barva odkazu. */
+      text-decoration:none; /* Odstraní podtržení. */
+      font-weight:800; /* Udělá odkaz výrazný. */
+      opacity:.9; /* Lehce zesvětlí průhledností. */
+    }
+
+    .nav a:hover{opacity:1} /* Po najetí myší bude odkaz plně viditelný. */
+
+    /* styl tlačítek */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center; /* Obsah tlačítka vycentruje. */
+      gap:10px; /* Mezery mezi ikonou a textem. */
+      padding:11px 14px; /* Vnitřní odsazení tlačítka. */
+      border-radius:14px; /* Zaoblené rohy. */
+      border:1px solid rgba(255,255,255,.18); /* Jemný rámeček. */
+      background: linear-gradient(135deg, rgba(0,255,213,.22), rgba(30,108,255,.18)); /* Barevný přechod pozadí tlačítka. */
+      color:var(--text); /* Barva textu. */
+      font-weight:900; /* Velmi tučný text. */
+      cursor:pointer; /* Po najetí myší bude ručička. */
+      box-shadow: var(--shadow); /* Stín tlačítka. */
+      text-decoration:none; /* Bez podtržení. */
+      user-select:none; /* Nepůjde snadno označit text tlačítka. */
+    }
+
+    .btn--ghost{background: rgba(255,255,255,.06);box-shadow:none} /* Jemnější, méně výrazná varianta tlačítka. */
+    .btn:active{transform: translateY(1px)} /* Při kliknutí se tlačítko lehce posune dolů, působí „stisknutě“. */
+
+    .pill{
+      padding:8px 10px;border-radius:999px; /* Malý kulatý štítek. */
+      border:1px solid var(--border); /* Rámeček štítku. */
+      background: rgba(0,0,0,.18); /* Tmavé pozadí. */
+      color:rgba(233,240,255,.86); /* Barva textu. */
+      font-weight:900; /* Tučný text. */
+      font-size:12px; /* Menší písmo. */
+      display:inline-flex;gap:8px;align-items:center; /* Obsah štítku zarovná vedle sebe. */
+    }
+
+    /* hlavní sekce a karty */
+    .hero{padding:32px 0 8px} /* Odsazení úvodní sekce. */
+
+    .hero__grid{
+      display:grid; /* Použije CSS grid. */
+      grid-template-columns: 1.2fr .8fr; /* Rozdělí obsah na dva sloupce – levý širší, pravý užší. */
+      gap:16px; /* Mezery mezi sloupci. */
+      align-items:stretch; /* Oba sloupce budou stejně vysoké podle obsahu. */
+    }
+
+    h1{margin:0 0 10px 0;font-size:42px} /* Styl hlavního nadpisu. */
+    h2{margin:0;font-size:28px} /* Styl nadpisů sekcí. */
+    .lead{color:var(--muted);line-height:1.6;margin:0 0 16px} /* Styl úvodního odstavce. */
+    .muted{color:var(--muted)} /* Pomocná třída pro méně výrazný text. */
+    .section{padding:32px 0} /* Odsazení všech sekcí. */
+
+    .section--alt{
+      background: rgba(255,255,255,.03); /* Lehce odlišné pozadí sekce. */
+      border-top:1px solid rgba(255,255,255,.05); /* Horní oddělovací čára. */
+      border-bottom:1px solid rgba(255,255,255,.05) /* Spodní oddělovací čára. */
+    }
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px} /* Mřížka na 2 stejné sloupce. */
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px} /* Mřížka na 3 stejné sloupce. */
+
+    .card{
+      border:1px solid var(--border); /* Rámeček karty. */
+      background: var(--card); /* Průhledné pozadí. */
+      border-radius:18px; /* Zaoblené rohy karty. */
+      padding:16px; /* Vnitřní odsazení. */
+      box-shadow: var(--shadow); /* Stín pod kartou. */
+    }
+
+    .glass{
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04)); /* Efekt „skleněné“ plochy. */
+    }
+
+    .card h3{margin:0 0 8px 0} /* Nadpis v kartě bude bez horního okraje a s malým spodním odsazením. */
+    .card p{margin:0;color:var(--muted);line-height:1.6} /* Odstavec v kartě bude méně výrazný a čitelný. */
+
+    /* statistiky */
+    .stats{display:grid;gap:10px;margin:10px 0} /* Blok statistik bude pod sebou s mezerami. */
+
+    .stat{
+      border:1px solid rgba(255,255,255,.10); /* Rámeček jedné statistiky. */
+      border-radius:14px; /* Zaoblené rohy. */
+      padding:12px; /* Vnitřní odsazení. */
+      background: rgba(0,0,0,.16); /* Tmavé pozadí. */
+    }
+
+    .stat__label{font-size:12px;color:var(--muted);font-weight:900} /* Menší popisek statistiky. */
+    .stat__value{font-size:18px;font-weight:900;margin-top:4px} /* Hlavní hodnota statistiky bude výrazná. */
+
+    /* formulář */
+    .form{display:flex;flex-direction:column;gap:10px} /* Všechny prvky formuláře budou pod sebou. */
+
+    .field{
+      display:flex; /* Flexbox. */
+      flex-direction:column; /* Obsah bude pod sebou – popisek nahoře, pole dole. */
+      gap:6px; /* Mezery mezi popiskem a polem. */
+      font-weight:900; /* Výraznější text. */
+      font-size:12px; /* Menší velikost písma. */
+      color:rgba(233,240,255,.78) /* Méně výrazná barva. */
+    }
+
+    .field input,.field select{
+      padding:11px 12px;border-radius:14px; /* Vzhled inputů a selectů. */
+      border:1px solid rgba(255,255,255,.14); /* Jemný rámeček. */
+      background: rgba(0,0,0,.18); /* Tmavé pozadí. */
+      color:var(--text);font-weight:900;outline:none; /* Barva textu, tučnost a odstranění default outline. */
+    }
+
+    .field input:focus,.field select:focus{border-color: rgba(0,255,213,.45)} /* Když uživatel klikne do pole, rámeček se zvýrazní. */
+
+    .note{
+      margin-top:12px;padding:10px 12px;border-radius:14px; /* Odsazení a vzhled informačního boxu. */
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(233,240,255,.86);
+    }
+
+    code{
+      background: rgba(0,0,0,.25); /* Pozadí inline kódu. */
+      border:1px solid rgba(255,255,255,.10); /* Jemný rámeček. */
+      padding:2px 6px;border-radius:10px; /* Odsazení a zaoblení. */
+      color:rgba(233,240,255,.92); /* Barva textu kódu. */
+    }
+
+    /* žebříček */
+    .section__header--row{
+      display:flex; /* Obsah bude vedle sebe. */
+      align-items:flex-end; /* Zarovná prvky ke spodní hraně. */
+      justify-content:space-between; /* Jeden blok vlevo, druhý vpravo. */
+      gap:14px; /* Mezery. */
+      flex-wrap:wrap /* Na menších obrazovkách se obsah zalomí. */
+    }
+
+    .filters{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap} /* Filtry budou vedle sebe a při nedostatku místa se zalomí. */
+
+    .table-wrap{
+      overflow:auto; /* Když je tabulka širší než obrazovka, půjde scrollovat vodorovně. */
+      border-radius:14px; /* Zaoblení obalu tabulky. */
+      margin-top:10px; /* Odsazení shora. */
+      border:1px solid rgba(255,255,255,.08) /* Jemný rámeček. */
+    }
+
+    table{width:100%;border-collapse:collapse;min-width:720px} /* Tabulka zabere celou šířku a sloučí rámečky buněk. */
+    th,td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left} /* Styl hlaviček i buněk tabulky. */
+    th{font-size:12px;color:rgba(233,240,255,.72);text-transform:uppercase;letter-spacing:.08em} /* Hlavičky budou malé, velkými písmeny a s rozestupy. */
+    tbody tr:hover{background: rgba(255,255,255,.04)} /* Po najetí na řádek tabulky se lehce zvýrazní. */
+
+    .msg{margin-top:8px} /* Odsazení zprávy pod formulářem. */
+    .msg--ok{color:rgba(68,255,154,.95);font-weight:900} /* Styl úspěšné zprávy. */
+    .msg--bad{color:rgba(255,77,109,.95);font-weight:900} /* Styl chybové zprávy. */
+
+    /* patička */
+    .footer{padding:22px 0} /* Odsazení patičky. */
+    .footer__inner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap} /* Rozložení prvků patičky. */
+
+    @media (max-width: 980px){ /* Media query – pravidla pro menší obrazovky. */
+      .hero__grid{grid-template-columns:1fr} /* Úvodní sekce bude mít jen jeden sloupec místo dvou. */
+      .grid-2{grid-template-columns:1fr} /* Mřížka na 2 sloupce se změní na 1 sloupec. */
+      .grid-3{grid-template-columns:1fr} /* Mřížka na 3 sloupce se změní na 1 sloupec. */
+      h1{font-size:36px} /* Hlavní nadpis bude na mobilu menší. */
+    }
+  </style> <!-- Konec CSS stylů. -->
+</head>
+
+<body> <!-- Začátek viditelné části stránky. Všechno, co je uvnitř body, se ukáže uživateli. -->
+
+<header class="topbar"> <!-- Horní navigační lišta. -->
+  <div class="container topbar__inner"> <!-- Vnitřní obsah horní lišty. -->
+    <div class="brand"> <!-- Blok značky – logo a název. -->
+      <div class="brand__logo">🐦</div> <!-- Emoji slouží jako jednoduché logo. -->
+      <div>
+        <div class="brand__title">Flappy Bird</div> <!-- Hlavní název projektu. -->
+        <div class="brand__sub">Žebříček + zapisování skóre (připraveno na DB)</div> <!-- Menší vysvětlující text pod názvem. -->
+      </div>
+    </div>
+
+    <nav class="nav"> <!-- Navigační menu stránky. -->
+      <a href="#o-hre">O hře</a> <!-- Odkaz posune stránku na sekci s id="o-hre". -->
+      <a href="#ovladani">Ovládání</a> <!-- Odkaz na sekci Ovládání. -->
+      <a href="#zebricek">Žebříček</a> <!-- Odkaz na sekci Žebříček. -->
+      <a class="btn btn--ghost" href="#zapis">Zapsat skóre</a> <!-- Odkaz v podobě tlačítka na formulář pro zápis skóre. -->
+    </nav>
+  </div>
+</header>
+
+<main> <!-- Hlavní obsah stránky. -->
+
+  <!-- HERO = úvodní hlavní část stránky -->
+  <section class="hero"> <!-- Úvodní sekce stránky. -->
+    <div class="container hero__grid"> <!-- Obsah je rozdělen do dvou sloupců. -->
+      <div>
+        <h1>Flappy Bird</h1> <!-- Největší nadpis stránky. -->
+        <p class="lead">
+          Webová stránka k maturitnímu projektu. Zobrazuje žebříček nejlepších hráčů
+          a umožňuje zapsat skóre (po propojení s databází přes backend API).
+        </p> <!-- Úvodní vysvětlení, k čemu stránka slouží. -->
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"> <!-- Blok tlačítek a štítků. -->
+          <a class="btn" href="#zebricek">Zobrazit žebříček</a> <!-- Tlačítko přejde na sekci žebříčku. -->
+          <a class="btn btn--ghost" href="#zapis">Zapsat skóre</a> <!-- Tlačítko přejde na formulář pro odeslání skóre. -->
+          <span class="pill">⚡ obtížnosti</span> <!-- Malý štítek s informací. -->
+          <span class="pill">🗄️ DB</span> <!-- Malý štítek, že projekt pracuje s databází. -->
+          <span class="pill">🌐 web</span> <!-- Malý štítek, že jde o webovou část projektu. -->
+        </div>
+
+        <div class="note"> <!-- Informační box. -->
+          <b>Backend API:</b> <code>GET /api/scores</code> a <code>POST /api/scores</code>.
+          Až spustíš server (<code>python server/app.py</code>), stránka se sama napojí.
+        </div> <!-- Tohle uživateli vysvětluje, že stránka potřebuje backend server. -->
+      </div>
+
+      <div class="card glass"> <!-- Pravá karta s informacemi o stavu systému. -->
+        <h3>Stav systému</h3> <!-- Nadpis karty. -->
+        <div class="stats"> <!-- Blok statistik. -->
+          <div class="stat">
+            <div class="stat__label">Server</div> <!-- Popisek statistiky. -->
+            <div id="serverStatus" class="stat__value">Neznámý</div> <!-- JavaScript sem později zapíše, jestli server běží. -->
+          </div>
+          <div class="stat">
+            <div class="stat__label">Počet načtených záznamů</div> <!-- Popisek statistiky. -->
+            <div id="totalScores" class="stat__value">—</div> <!-- JavaScript sem zapíše počet načtených výsledků. -->
+          </div>
+          <div class="stat">
+            <div class="stat__label">Nejvyšší skóre (aktuální filtr)</div> <!-- Popisek statistiky. -->
+            <div id="maxScore" class="stat__value">—</div> <!-- JavaScript sem zapíše nejvyšší skóre. -->
+          </div>
+        </div>
+        <p class="muted"></p> <!-- Prázdný odstavec, momentálně nic nedělá. -->
+      </div>
+    </div>
+  </section>
+
+  <!-- sekce O hře -->
+  <section id="o-hre" class="section"> <!-- Tato sekce má id="o-hre", aby na ni šlo skočit z menu. -->
+    <div class="container">
+      <div style="margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap;"> <!-- Blok s odkazy na další stránky projektu. -->
+
+        <a href="diagram.html" style="
+          display:inline-block;
+          padding:12px 22px;
+          background:#00ffd5;
+          color:black;
+          text-decoration:none;
+          font-weight:bold;
+          border-radius:12px;
+        ">
+          Zobrazit ER. diagram
+        </a> <!-- Odkaz na samostatnou stránku s vývojovým diagramem. -->
+
+        <a href="projekt_info.html" style="
+          display:inline-block;
+          padding:12px 22px;
+          background:#00ffd5;
+          color:black;
+          text-decoration:none;
+          font-weight:bold;
+          border-radius:12px;
+        ">
+          O projektu
+        </a> <!-- Odkaz na samostatnou stránku s informacemi o projektu. -->
+
+          <a href="diagramy.html" style="
+  display:inline-block;
+  padding:12px 22px;
+  background:#00ffd5;
+  color:black;
+  text-decoration:none;
+  font-weight:bold;
+  border-radius:12px;
+">
+  Vývojové diagramy
+</a>
+      </div>
+
+      <h2>O hře</h2> <!-- Nadpis sekce. -->
+      <p class="muted">Krátce, jasně</p> <!-- Krátký podnadpis. -->
+
+      <div class="grid-3" style="margin-top:12px"> <!-- Tři karty vedle sebe. -->
+        <div class="card">
+          <h3>Cíl</h3> <!-- Nadpis karty. -->
+          <p>Proleť mezi překážkami. Za každou překonanou překážku získáš bod.</p> <!-- Vysvětlení cíle hry. -->
+        </div>
+        <div class="card">
+          <h3>Obtížnosti</h3> <!-- Nadpis karty. -->
+          <p>Easy/Normal/Hard/Insane – liší se rychlostí a velikostí mezer.</p> <!-- Vysvětlení obtížností. -->
+        </div>
+        <div class="card">
+          <h3>DB & Web</h3> <!-- Nadpis karty. -->
+          <p>Hra posílá skóre na backend. Web čte data z databáze a zobrazuje žebříček.</p> <!-- Vysvětlení propojení hry, webu a databáze. -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sekce Ovládání -->
+  <section id="ovladani" class="section section--alt"> <!-- Sekce s alternativním pozadím. -->
+    <div class="container">
+      <h2>Ovládání</h2> <!-- Nadpis sekce. -->
+      <p class="muted">Co zmáčknout.</p> <!-- Doplňující text. -->
+
+      <div class="grid-2" style="margin-top:12px"> <!-- Dvě karty vedle sebe. -->
+        <div class="card">
+          <h3>Klávesy</h3> <!-- Nadpis první karty. -->
+          <p class="muted">
+            Space/klik = skok • Enter = start/potvrzení • Esc = zpět • R = refresh žebříčku
+          </p> <!-- Přehled ovládání hry a webu. -->
+        </div>
+        <div class="card">
+          <h3>Jak se ukládá skóre</h3> <!-- Nadpis druhé karty. -->
+          <p class="muted">
+            Web odesílá JSON na <code>POST /api/scores</code>.
+            Backend uloží do DB a web pak načte <code>GET /api/scores</code>.
+          </p> <!-- Popis komunikace mezi webem a serverem. -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sekce žebříčku -->
+  <section id="zebricek" class="section"> <!-- Sekce s žebříčkem výsledků. -->
+    <div class="container">
+      <div class="section__header--row"> <!-- Horní řádek sekce: vlevo text, vpravo filtry. -->
+        <div>
+          <h2>Žebříček</h2> <!-- Nadpis sekce. -->
+          <p class="muted">Načítá se z databáze přes API. (Filtr obtížnosti + limit)</p> <!-- Vysvětlení, odkud se data berou. -->
+        </div>
+
+        <div class="filters"> <!-- Filtrační prvky. -->
+          <label class="field">
+            <span>Obtížnost</span> <!-- Popisek selectu. -->
+            <select id="diff"> <!-- Select pro výběr obtížnosti. JavaScript ho čte podle id="diff". -->
+              <option value="easy">Easy</option>
+              <option value="normal" selected>Normal</option> <!-- selected = tato možnost je výchozí. -->
+              <option value="hard">Hard</option>
+              <option value="insane">Insane</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Limit</span> <!-- Popisek selectu. -->
+            <select id="limit"> <!-- Select pro počet výsledků. -->
+              <option value="10" selected>Top 10</option>
+              <option value="25">Top 25</option>
+              <option value="50">Top 50</option>
+            </select>
+          </label>
+
+          <button class="btn btn--ghost" id="reload">↻ Načíst</button> <!-- Tlačítko ručně načte data ze serveru. -->
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px"> <!-- Karta obsahující tabulku. -->
+        <div id="note" class="muted">Klikni na “Načíst”.</div> <!-- Informační text nad tabulkou. JavaScript ho mění podle stavu. -->
+
+        <div class="table-wrap"> <!-- Obal kvůli scrollování tabulky na malých obrazovkách. -->
+          <table aria-label="Leaderboard"> <!-- Tabulka žebříčku. aria-label pomáhá přístupnosti. -->
+            <thead> <!-- Hlavička tabulky. -->
+              <tr>
+                <th>#</th> <!-- Pořadí hráče. -->
+                <th>Jméno</th> <!-- Jméno hráče. -->
+                <th>Skóre</th> <!-- Skóre. -->
+                <th>Obtížnost</th> <!-- Zvolená obtížnost. -->
+                <th>Datum</th> <!-- Datum vytvoření záznamu. -->
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody> <!-- Prázdné tělo tabulky. JavaScript sem později vloží řádky. -->
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sekce pro odeslání skóre -->
+  <section id="zapis" class="section section--alt"> <!-- Sekce s formulářem pro zapsání skóre. -->
+    <div class="container">
+      <h2>Zapsat skóre</h2> <!-- Nadpis sekce. -->
+      <p class="muted"></p> <!-- Prázdný podnadpis. -->
+
+      <div class="grid-2" style="margin-top:12px"> <!-- Dvě karty vedle sebe. -->
+        <div class="card">
+          <h3>Odeslat výsledek</h3> <!-- Nadpis formuláře. -->
+
+          <form id="form" class="form"> <!-- Formulář pro odeslání výsledku. JavaScript se na něj napojí podle id="form". -->
+            <label class="field">
+              <span>Jméno hráče</span> <!-- Popisek vstupního pole. -->
+              <input id="name" maxlength="20" placeholder="Např. Ondra" required /> <!-- Pole pro jméno. required = musí být vyplněné. -->
+            </label>
+
+            <label class="field">
+              <span>Obtížnost</span> <!-- Popisek selectu. -->
+              <select id="fdiff"> <!-- Obtížnost pro odesílané skóre. -->
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+                <option value="insane">Insane</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Skóre</span> <!-- Popisek pole. -->
+              <input id="score" type="number" min="0" max="999999" placeholder="0" required /> <!-- Pole pro číslo skóre. -->
+            </label>
+
+            <button class="btn" type="submit">Odeslat</button> <!-- Tlačítko odešle formulář. -->
+            <div id="formMsg" class="msg muted"></div> <!-- JavaScript sem vypisuje úspěch nebo chybu po odeslání. -->
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Endpointy (pro propojení)</h3> <!-- Informační karta. -->
+          <p class="muted">Tahle stránka počítá s těmito URL:</p> <!-- Krátké vysvětlení. -->
+          <ul class="muted" style="line-height:1.9;margin:8px 0 0 18px"> <!-- Seznam API adres. -->
+            <li><code>GET /api/health</code> – stav serveru</li> <!-- Endpoint pro test, jestli backend běží. -->
+            <li><code>GET /api/scores?difficulty=normal&amp;limit=10</code> – žebříček</li> <!-- Endpoint pro načtení žebříčku. -->
+            <li><code>POST /api/scores</code> – uložení skóre</li> <!-- Endpoint pro odeslání nového výsledku. -->
+          </ul>
+          <div class="note">
+
+          </div> <!-- Prázdný poznámkový box. Zatím nic neobsahuje. -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer"> <!-- Patička stránky. -->
+    <div class="container footer__inner">
+      <div class="muted">© Flappy Bird – maturitní projekt</div> <!-- Text vlevo. -->
+      <div class="muted">Frontend: HTML/CSS/JS • Backend: Flask • DB: školní/SQLite</div> <!-- Přehled použitých technologií. -->
+    </div>
+  </footer>
+</main>
+
+<script>
+  // JavaScript = logika stránky.
+  // Tato část zajišťuje komunikaci s backendem, načítání žebříčku a odesílání skóre.
+
+  const API_BASE = "http://127.0.0.1:5000"; // Adresa backend serveru. Zde běží Flask aplikace.
+
+  const $ = (id) => document.getElementById(id); // Krátká pomocná funkce. Místo document.getElementById("neco") stačí psát $("neco").
+
+  function escapeHtml(s){ // Bezpečnostní funkce. Chrání stránku před vložením nebezpečného HTML nebo JavaScriptu.
+    return String(s) // Vstup převede na text.
+      .replaceAll("&","&amp;") // Znak & nahradí bezpečnou HTML entitou.
+      .replaceAll("<","&lt;") // Znak < nahradí, aby se nebral jako HTML tag.
+      .replaceAll(">","&gt;") // Znak > nahradí.
+      .replaceAll('"',"&quot;") // Dvojité uvozovky nahradí.
+      .replaceAll("'","&#039;"); // Jednoduché uvozovky nahradí.
+  }
+
+  async function apiHealth(){ // Asynchronní funkce, která ověří, jestli běží server.
+    try{
+      const r = await fetch(API_BASE + "/api/health", {cache:"no-store"}); // Pošle GET požadavek na /api/health. await znamená „počkej na odpověď“.
+      if(!r.ok) throw new Error("HTTP " + r.status); // Pokud server vrátí chybu, vyhodí vlastní chybu.
+      const j = await r.json(); // Odpověď převede z JSONu na JavaScript objekt.
+      return !!j.ok; // Vrátí true nebo false podle toho, co server poslal.
+    }catch{
+      return false; // Když server neběží nebo dojde k chybě, vrátí false.
+    }
+  }
+
+  function setServerStatus(ok){ // Funkce nastaví text o stavu serveru na stránce.
+    $("serverStatus").textContent = ok ? "Dostupný ✅" : "Nedostupný ❌"; // Když je ok true, zobrazí dostupný, jinak nedostupný.
+  }
+
+  async function loadScores(){ // Funkce načte žebříček ze serveru.
+    const diff = $("diff").value; // Z inputu s id="diff" vezme zvolenou obtížnost.
+    const limit = $("limit").value; // Z inputu s id="limit" vezme počet načítaných výsledků.
+
+    $("note").textContent = "Načítám…"; // Uživatel uvidí zprávu, že se načítají data.
+    $("tbody").innerHTML = ""; // Vymaže starý obsah tabulky.
+
+    try{
+      const r = await fetch(`${API_BASE}/api/scores?difficulty=${encodeURIComponent(diff)}&limit=${encodeURIComponent(limit)}`, {cache:"no-store"}); // Sestaví URL s parametry difficulty a limit a pošle GET požadavek.
+      if(!r.ok) throw new Error("HTTP " + r.status); // Pokud server vrátí chybu, vyhodí se chyba.
+      const j = await r.json(); // Odpověď serveru se převede na JSON objekt.
+      const items = j.items || []; // Vezme pole položek. Když nepřijde, použije prázdné pole.
+
+      $("note").textContent = items.length ? `Načteno ${items.length} záznamů.` : "Zatím žádná data."; // Když jsou data, ukáže počet. Když ne, ukáže info, že nic není.
+
+      $("tbody").innerHTML = items.map((it, idx) => `
+        <tr>
+          <td>${idx+1}</td>
+          <td><b>${escapeHtml(it.name ?? "")}</b></td>
+          <td><b>${it.score ?? ""}</b></td>
+          <td>${escapeHtml(it.difficulty ?? "")}</td>
+          <td>${escapeHtml(it.created_at ?? "")}</td>
+        </tr>
+      `).join(""); // Projde všechny výsledky, vytvoří z nich HTML řádky a vloží je do tabulky.
+
+      $("totalScores").textContent = String(items.length); // Do statistiky nahoře zapíše počet načtených záznamů.
+      const max = items.reduce((m,x)=>Math.max(m, Number(x.score||0)), 0); // Projde všechna skóre a najde nejvyšší.
+      $("maxScore").textContent = max ? String(max) : "—"; // Zobrazí nejvyšší skóre, nebo pomlčku, pokud nic není.
+    }catch(e){
+      $("note").textContent = "Chyba: nepodařilo se načíst data. Zkontroluj server/DB."; // Zobrazí chybovou zprávu.
+      $("totalScores").textContent = "—"; // Reset počtu načtených dat.
+      $("maxScore").textContent = "—"; // Reset nejvyššího skóre.
+    }
+  }
+
+  async function submitScore(ev){ // Funkce pro odeslání skóre z formuláře.
+    ev.preventDefault(); // Zabrání klasickému chování formuláře – tedy reloadu stránky.
+
+    const name = $("name").value.trim(); // Načte jméno hráče a odstraní mezery na začátku a konci.
+    const difficulty = $("fdiff").value; // Načte zvolenou obtížnost.
+    const score = Number($("score").value); // Načte skóre a převede ho na číslo.
+
+    $("formMsg").className = "msg muted"; // Nastaví neutrální vzhled zprávy.
+    $("formMsg").textContent = "Odesílám…"; // Zobrazí informaci, že data odcházejí na server.
+
+    try{
+      const r = await fetch(API_BASE + "/api/scores", { // Pošle požadavek na endpoint pro uložení skóre.
+        method:"POST", // Typ požadavku je POST, protože posíláme nová data.
+        headers:{"Content-Type":"application/json"}, // Říkáme serveru, že posíláme JSON.
+        body: JSON.stringify({username: name, difficulty, score}) // Převede data do JSON textu a pošle je.
+      });
+
+      const j = await r.json().catch(()=>({})); // Pokusí se přečíst odpověď jako JSON. Když to nepůjde, vrátí prázdný objekt.
+      if(!r.ok) throw new Error(j.error || ("HTTP " + r.status)); // Pokud server hlásí chybu, vypíše ji.
+
+      $("formMsg").className = "msg msg--ok"; // Nastaví zelený styl zprávy.
+      $("formMsg").textContent = "Skóre uloženo ✅"; // Zobrazí úspěch.
+      $("diff").value = difficulty; // Automaticky nastaví stejnou obtížnost i do filtru žebříčku.
+      await loadScores(); // Po úspěšném odeslání znovu načte tabulku, aby se nový výsledek hned ukázal.
+    }catch(e){
+      $("formMsg").className = "msg msg--bad"; // Nastaví červený styl zprávy.
+      $("formMsg").textContent = "Chyba: " + (e.message || e); // Vypíše chybu, která nastala.
+    }
+  }
+
+  async function init(){ // Spouštěcí funkce celé stránky.
+    const ok = await apiHealth(); // Ověří, jestli běží backend server.
+    setServerStatus(ok); // Podle výsledku vypíše stav serveru do karty.
+
+    $("reload").addEventListener("click", loadScores); // K tlačítku Načíst připojí funkci loadScores.
+    $("form").addEventListener("submit", submitScore); // K formuláři připojí funkci submitScore při odeslání.
+
+    if(ok) loadScores(); // Pokud server běží, načte žebříček automaticky hned po otevření stránky.
+  }
+
+  init(); // Zavolá spouštěcí funkci, takže se vše nastaví při načtení stránky.
+</script>
+
+</body> <!-- Konec těla stránky. -->
+</html> <!-- Konec celého HTML dokumentu. -->

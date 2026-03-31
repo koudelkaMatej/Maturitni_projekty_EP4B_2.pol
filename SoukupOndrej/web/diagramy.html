@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vývojové diagramy</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#0b1b2b;
+      color:white;
+    }
+
+    .container{
+  max-width:900px;     /* 👈 zmenší celou stránku */
+  margin:0 auto;
+  padding:40px 20px;
+}
+
+    .topbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:30px;
+    }
+
+    .btn{
+      display:inline-block;
+      padding:12px 22px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:bold;
+      transition:0.2s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+      opacity:0.95;
+    }
+
+    .btn-back{
+      background:#00ffd5;
+      color:black;
+    }
+
+    .btn-project{
+      background:#ffffff;
+      color:black;
+    }
+
+    h1{
+      margin-top:0;
+      font-size:34px;
+    }
+
+    .subtitle{
+      color:rgba(255,255,255,0.78);
+      margin-bottom:28px;
+      line-height:1.6;
+    }
+
+    .card{
+  background:rgba(0,0,0,0.28);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:18px;
+  padding:18px;          /* 👈 menší padding */
+  margin:0 auto 20px;    /* 👈 vycentruje */
+  max-width:700px;       /* 👈 menší okno */
+  box-shadow:0 6px 18px rgba(0,0,0,0.18);
+}
+
+    .card h2{
+      margin-top:0;
+      color:#00ffd5;
+      font-size:24px;
+      margin-bottom:16px;
+    }
+
+    .card p{
+      line-height:1.7;
+      color:rgba(255,255,255,0.9);
+    }
+
+    .diagram-img{
+  width:100%;
+  max-width:500px;      /* 👈 menší než předtím */
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:white;
+  display:block;
+  margin:12px auto;
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <a class="btn btn-back" href="/">← Zpět na hlavní stránku</a>
+      <a class="btn btn-project" href="projekt_info.html">O projektu</a>
+    </div>
+
+    <h1>Vývojové diagramy</h1>
+    <p class="subtitle">
+      Tato stránka obsahuje vývojové diagramy vybraných funkcí ze hry Flappy Bird.
+      Diagramy ukazují logiku zpracování jednotlivých částí programu.
+    </p>
+
+    <div class="card">
+      <h2>1. Funkce flap</h2>
+      <p>
+        Diagram ukazuje logiku skoku ptáka. Kontroluje stav hry, cooldown a následně nastaví rychlost skoku a vytvoří částice.
+      </p>
+      <img src="flap.png" alt="Vývojový diagram flap" class="diagram-img">
+    </div>
+
+    <div class="card">
+      <h2>2. Funkce collide</h2>
+      <p>
+        Diagram ukazuje kontrolu kolize ptáka se zemí, stropem a trubkami.
+      </p>
+      <img src="collide.png" alt="Vývojový diagram collide" class="diagram-img">
+    </div>
+
+    <div class="card">
+      <h2>3. Funkce collect boosts</h2>
+      <p>
+        Diagram ukazuje logiku sbírání boostu, aktivaci časovače a vytvoření vizuálního efektu.
+      </p>
+      <img src="collectboosts.png" alt="Vývojový diagram collect_boosts" class="diagram-img">
+    </div>
+
+  </div>
+</body>
+</html>
