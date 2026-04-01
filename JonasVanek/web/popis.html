@@ -288,6 +288,138 @@
         </div>
     </section>
 
+    <!-- VÝVOJOVÉ DIAGRAMY -->
+    <section class="doc-section">
+        <h2 class="section-title">
+            <span class="pixel-icon">📊</span>
+            VÝVOJOVÉ DIAGRAMY
+        </h2>
+        
+        <p style="font-size: 1.2em; line-height: 1.7; margin-bottom: 24px;">
+            Vizuální znázornění klíčových procesů v aplikaci. Tyto diagramy slouží k rychlému pochopení logiky hry a komunikace mezi komponentami.
+        </p>
+
+        <h3 style="font-family: 'Press Start 2P', monospace; font-size: 0.9em; margin: 28px 0 16px; color: var(--pipe-dark);">
+            DIAGRAM 1: HERNÍ SMYČKA (GAME LOOP)
+        </h3>
+        
+        <p style="font-size: 1.2em; line-height: 1.7; margin-bottom: 16px;">
+            Hlavní herní smyčka běžící na 60 FPS. Znázorňuje celý cyklus od zpracování vstupu přes fyziku a kolize až po vykreslení a rozhodování o konci hry.
+        </p>
+
+        <div class="doc-grid" style="margin-bottom: 20px;">
+            <div class="doc-card">
+                <h4>INICIALIZACE</h4>
+                <ul>
+                    <li>Ptáček na střed obrazovky</li>
+                    <li>GAP = 200px (startovní mezera)</li>
+                    <li>Rychlost trubek = 4.0 px/frame</li>
+                    <li>Skóre = 0</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>FYZIKA & ANIMACE</h4>
+                <ul>
+                    <li>Gravitace (velocity += 0.5)</li>
+                    <li>Rotace ptáčka podle rychlosti</li>
+                    <li>Mávání křídly při skoku</li>
+                    <li>Plynulý pohyb na 60 FPS</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>STŘÍDÁNÍ PATTERNŮ</h4>
+                <ul>
+                    <li>Pattern 0: Naproti sobě (střed)</li>
+                    <li>Pattern 1: Posunuté (nahoru/dolů)</li>
+                    <li>Automatické střídání každou trubku</li>
+                    <li>Zvyšuje dynamičnost hry</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>OBTÍŽNOST</h4>
+                <ul>
+                    <li>Každé 3 body → rychlejší</li>
+                    <li>GAP se zmenšuje (-3px nebo -6px)</li>
+                    <li>Minimální GAP = 120px</li>
+                    <li>3 profily: Lehká, Střední, Těžká</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="er-diagram-wrapper">
+            <img src="diagram_game_loop.png" alt="Vývojový diagram herní smyčky">
+            <p style="margin-top: 12px; font-size: 0.95em; color: #666;"><em>Obr. 1: Vývojový diagram hlavní herní smyčky (60 FPS)</em></p>
+        </div>
+
+        <h3 style="font-family: 'Press Start 2P', monospace; font-size: 0.9em; margin: 40px 0 16px; color: var(--pipe-dark);">
+            DIAGRAM 2: UŽIVATELSKÝ FLOW (LOGIN → HRA → DATABÁZE)
+        </h3>
+        
+        <p style="font-size: 1.2em; line-height: 1.7; margin-bottom: 16px;">
+            Kompletní cesta uživatele od spuštění aplikace přes autentizaci, hraní hry až po uložení skóre do databáze. Zobrazuje HTTP komunikaci s backendem a databázovou logiku.
+        </p>
+
+        <div class="doc-grid" style="margin-bottom: 20px;">
+            <div class="doc-card">
+                <h4>AUTENTIZACE</h4>
+                <ul>
+                    <li>Login/Register formulář</li>
+                    <li>Validace (3+ znaky, 4+ heslo)</li>
+                    <li>HTTP POST → PHP backend</li>
+                    <li>Session management (user_id)</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>VÝBĚR & HRA</h4>
+                <ul>
+                    <li>Výběr obtížnosti (3 úrovně)</li>
+                    <li>Hlavní menu</li>
+                    <li>Herní smyčka (ref. Diagram 1)</li>
+                    <li>Game Over screen</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>ODESLÁNÍ SKÓRE</h4>
+                <ul>
+                    <li>HTTP POST submit_score.php</li>
+                    <li>Payload: user_id, score, difficulty</li>
+                    <li>Server porovná s best-score</li>
+                    <li>UPDATE nebo INSERT do DB</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h4>DATABÁZOVÁ LOGIKA</h4>
+                <ul>
+                    <li>SELECT best score per difficulty</li>
+                    <li>Porovnání nové vs. stávající</li>
+                    <li>DELETE starý + INSERT nový</li>
+                    <li>CASCADE DELETE při smazání usera</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="er-diagram-wrapper">
+            <img src="diagram_user_flow.png" alt="Vývojový diagram uživatelského flow">
+            <p style="margin-top: 12px; font-size: 0.95em; color: #666;"><em>Obr. 2: Vývojový diagram uživatelského flow a komunikace s databází</em></p>
+        </div>
+
+        <div class="highlight-box">
+            <h3>💡 VYUŽITÍ DIAGRAMŮ</h3>
+            <p>
+                Tyto diagramy jsou ideální pro <strong>prezentaci projektu</strong> investorům, 
+                školním hodnotitelům nebo novým členům vývojového týmu. Poskytují rychlý přehled 
+                o logice aplikace bez nutnosti číst kód. Doporučujeme je vytisknout ve velkém 
+                formátu (A3) pro lepší čitelnost během prezentace.
+            </p>
+        </div>
+    </section>
+
     <!-- TECHNOLOGIE -->
     <section class="doc-section">
         <h2 class="section-title">
