@@ -67,9 +67,15 @@ class TetrisHandler(http.server.SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         """Přepíše výchozí logování - zobrazí jen důležité info."""
-        if "/api/" in args[0] if args else False:
-            print(f"  API  {self.command} {self.path}")
-        # Statické soubory nelogujeme (bylo by příliš mnoho výpisů)
+        # Kontrola zda je to API endpoint
+        try:
+            if args and len(args) > 0:
+                first_arg = str(args[0])  # Konverze na string (může být HTTPStatus)
+                if "/api/" in first_arg:
+                    print(f"  API  {self.command} {self.path}")
+        except:
+            pass  # Tichý ignore chyb v logování
+        # Statické soubory a favicon nelogujeme
 
     def send_json(self, status, data):
         """Odešle JSON odpověď s CORS hlavičkami."""
@@ -117,6 +123,10 @@ class TetrisHandler(http.server.SimpleHTTPRequestHandler):
             uzivatele = nacti_uzivatele()
             jmena = [u["username"] for u in uzivatele]
             self.send_json(200, {"uzivatele": jmena, "pocet": len(jmena)})
+
+        elif path == "/favicon.ico":
+            # Ignoruj požadavky na favicon (prohlížeč ho automaticky žádá)
+            self.send_error(404)
 
         else:
             # Normální statický soubor (HTML, CSS, JS, JSON...)
