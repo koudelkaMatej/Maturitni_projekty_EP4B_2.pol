@@ -89,6 +89,7 @@ $isLoggedIn = isset($_SESSION['user']);
             <a href="index.php#scoreboard">Scoreboard</a>
         <?php endif; ?>
         <a href="diagram.jpg" target="_blank">Er-diagram</a>
+        <a href="Diagram.png" target="_blank">diagram</a>
     </div>
     <div class="nav-right">
         <?php if ($isLoggedIn): ?>
