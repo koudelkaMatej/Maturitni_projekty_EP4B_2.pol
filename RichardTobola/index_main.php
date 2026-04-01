@@ -1,424 +1,485 @@
-<?php
-// 1. ZAPNUTÍ DIAGNOSTIKY
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+import pygame
+import random
+import math
+import sys
+import requests
+import unittest  # PŘIDÁNO: Knihovna pro unit testy
 
-session_start();
+# Inicializace Pygame (nutné i pro testy)
+pygame.init()
 
-// --- KONFIGURACE DATABÁZE ---
-$host = 'dbs.spskladno.cz';
-$db   = 'vyuka10';
-$user = 'student10'; 
-$pass = 'spsnet';
-$charset = 'utf8mb4';
+# Nové Konstanty (Upravené rozlišení)
+WIDTH, HEIGHT = 1024, 768
+FPS = 60
 
-try {
-    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-    $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
-} catch (\PDOException $e) {
-    die("CHYBA PŘIPOJENÍ: " . $e->getMessage());
-}
+class Particle:
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.vx = random.uniform(-5, 5)
+        self.vy = random.uniform(-5, 5)
+        self.life = random.randint(20, 40)
+        self.color = color
 
-// =========================================================
-// --- API PRO PYTHON HRU (Komunikace mezi hrou a webem) ---
-// =========================================================
-if (isset($_GET['api'])) {
-    header('Content-Type: application/json');
-    $input = json_decode(file_get_contents('php://input'), true);
+    def update(self):
+        self.x += self.vx
+        self.y += self.vy
+        self.life -= 1
 
-    if ($_GET['api'] == 'login') {
-        $u = $input['username'] ?? '';
-        $p = $input['password'] ?? '';
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-        $stmt->execute([$u]);
-        $user_data = $stmt->fetch();
-        if ($user_data && password_verify($p, $user_data['password'])) {
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false]);
-        }
-        exit;
-    }
+    def draw(self, surface):
+        if self.life > 0:
+            pygame.draw.circle(surface, self.color, (int(self.x), int(self.y)), max(1, self.life // 10))
 
-    if ($_GET['api'] == 'savescore') {
-        $u = $input['username'] ?? '';
-        $p = $input['password'] ?? '';
-        $score = (int)($input['score'] ?? 0);
-        $diff = $input['difficulty'] ?? 'normal';
+class Paddle:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 15, 80)
+        self.base_speed = 5
+        self.speed = self.base_speed
+        self.score = 0
 
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-        $stmt->execute([$u]);
-        $user_data = $stmt->fetch();
+    def move(self, up, down):
+        if up and self.rect.top > 0:
+            self.rect.y -= self.speed
+        if down and self.rect.bottom < HEIGHT:
+            self.rect.y += self.speed
 
-        if ($user_data && password_verify($p, $user_data['password'])) {
-            if ($score > $user_data['score']) {
-                $stmt = $pdo->prepare("UPDATE users SET score = ?, difficulty = ? WHERE id = ?");
-                $stmt->execute([$score, $diff, $user_data['id']]);
+    def ai_move(self, ball, difficulty):
+        if difficulty == "easy":
+            ai_speed = self.speed * 0.5
+        elif difficulty == "normal":
+            ai_speed = self.speed * 0.85
+        else: # hard
+            ai_speed = self.speed * 1.2
+
+        if self.rect.centery < ball.rect.centery and self.rect.bottom < HEIGHT:
+            self.rect.y += ai_speed
+        elif self.rect.centery > ball.rect.centery and self.rect.top > 0:
+            self.rect.y -= ai_speed
+
+    def draw(self, surface, color):
+        pygame.draw.rect(surface, color, self.rect)
+
+class Ball:
+    def __init__(self):
+        self.rect = pygame.Rect(WIDTH // 2 - 7, HEIGHT // 2 - 7, 14, 14)
+        self.base_speed = 5
+        self.speed = self.base_speed
+        self.reset()
+
+    def reset(self):
+        self.rect.center = (WIDTH // 2, HEIGHT // 2)
+        self.speed = self.base_speed
+        angle = random.uniform(-math.pi / 4, math.pi / 4)
+        direction = 1 if random.random() > 0.5 else -1
+        self.dx = math.cos(angle) * self.speed * direction
+        self.dy = math.sin(angle) * self.speed
+
+    def update(self):
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+
+        if self.rect.top <= 0 or self.rect.bottom >= HEIGHT:
+            self.dy *= -1
+
+    def draw(self, surface, color):
+        pygame.draw.rect(surface, color, self.rect)
+
+class Game:
+    def __init__(self):
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.display.set_caption("PONGp System Archive v1.8")
+        self.clock = pygame.time.Clock()
+        self.font_large = pygame.font.Font(None, 74)
+        self.font_small = pygame.font.Font(None, 36)
+        self.font_input = pygame.font.Font(None, 24) # UPRAVENO: Menší font pro inputy
+
+        # --- API Konfigurace ---
+        self.api_url = "https://xeon.spskladno.cz/~tobolar/index_new_new.php" 
+        self.logged_in_user = None
+        self.logged_in_password = None
+
+        # Nastavení
+        self.is_dark_mode = True
+        self.difficulty = "normal"
+        self.state = "MENU" 
+        self.winner = None
+
+        # Herní objekty
+        self.player = Paddle(30, HEIGHT // 2 - 40)
+        self.opponent = Paddle(WIDTH - 45, HEIGHT // 2 - 40)
+        self.ball = Ball()
+        self.particles = []
+
+        # Background AI
+        self.bg_paddle1 = Paddle(30, HEIGHT // 2 - 40)
+        self.bg_paddle2 = Paddle(WIDTH - 45, HEIGHT // 2 - 40)
+        self.bg_ball = Ball()
+        
+        # Proměnné pro Login Overlay
+        self.show_login_overlay = False
+        self.username_text = ""
+        self.password_text = ""
+        self.active_input = None
+        self.overlay_rects = {}
+
+    def api_login(self, username, password):
+        try:
+            payload = {"username": username, "password": password}
+            response = requests.post(f"{self.api_url}?api=login", json=payload)
+            data = response.json()
+            if data.get("success"):
+                self.logged_in_user = username
+                self.logged_in_password = password
+                print(f"API: Hráč {username} přihlášen.")
+                return True
+            else:
+                print("API: Neplatné přihlašovací údaje.")
+                return False
+        except Exception as e:
+            print(f"API Chyba: {e}")
+            return False
+
+    def api_save_score(self):
+        if not self.logged_in_user:
+            return
+        
+        try:
+            payload = {
+                "username": self.logged_in_user,
+                "password": self.logged_in_password,
+                "score": self.player.score,
+                "difficulty": self.difficulty
             }
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false]);
+            response = requests.post(f"{self.api_url}?api=savescore", json=payload)
+            print("API: Skóre odesláno na server.")
+        except Exception as e:
+            print(f"API Chyba při ukládání: {e}")
+
+    def get_colors(self):
+        if self.is_dark_mode:
+            return (10, 10, 10), (240, 240, 240)
+        else:
+            return (240, 240, 240), (10, 10, 10)
+
+    def draw_dashed_line(self, surface, color):
+        for y in range(0, HEIGHT, 30):
+            pygame.draw.rect(surface, color, (WIDTH // 2 - 2, y, 4, 15))
+
+    def create_particles(self, x, y, color):
+        for _ in range(15):
+            self.particles.append(Particle(x, y, color))
+
+    def handle_collisions(self):
+        if self.ball.rect.colliderect(self.player.rect) and self.ball.dx < 0:
+            self.bounce_off_paddle(self.player)
+        if self.ball.rect.colliderect(self.opponent.rect) and self.ball.dx > 0:
+            self.bounce_off_paddle(self.opponent)
+
+    def bounce_off_paddle(self, paddle):
+        _, fg = self.get_colors()
+        self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, fg)
+        
+        intersect_y = paddle.rect.centery - self.ball.rect.centery
+        normalized_intersect = intersect_y / (paddle.rect.height / 2)
+        bounce_angle = normalized_intersect * (math.pi / 3) 
+        
+        self.ball.speed += 0.5
+        self.player.speed = self.player.base_speed + (self.ball.speed - self.ball.base_speed) * 0.5
+        self.opponent.speed = self.opponent.base_speed + (self.ball.speed - self.ball.base_speed) * 0.5
+
+        direction = 1 if self.ball.dx < 0 else -1
+        self.ball.dx = math.cos(bounce_angle) * self.ball.speed * direction
+        self.ball.dy = -math.sin(bounce_angle) * self.ball.speed
+
+    def reset_game(self):
+        self.player.score = 0
+        self.opponent.score = 0
+        self.player.speed = self.player.base_speed
+        self.opponent.speed = self.opponent.base_speed
+        self.ball.reset()
+        self.particles.clear()
+
+    def update_background_ai(self):
+        self.bg_ball.update()
+        if self.bg_ball.rect.top <= 0 or self.bg_ball.rect.bottom >= HEIGHT:
+            self.bg_ball.dy *= -1
+        if self.bg_ball.rect.colliderect(self.bg_paddle1.rect) and self.bg_ball.dx < 0:
+            self.bg_ball.dx *= -1
+        if self.bg_ball.rect.colliderect(self.bg_paddle2.rect) and self.bg_ball.dx > 0:
+            self.bg_ball.dx *= -1
+        if self.bg_ball.rect.left <= 0 or self.bg_ball.rect.right >= WIDTH:
+            self.bg_ball.reset()
+
+        self.bg_paddle1.ai_move(self.bg_ball, "normal")
+        self.bg_paddle2.ai_move(self.bg_ball, "normal")
+
+    def draw_button(self, text, x, y, w, h, mouse_pos):
+        bg, fg = self.get_colors()
+        rect = pygame.Rect(x, y, w, h)
+        color = (100, 100, 100) if rect.collidepoint(mouse_pos) else fg
+        text_color = bg
+        pygame.draw.rect(self.screen, color, rect, border_radius=5)
+        text_surf = self.font_small.render(text, True, text_color)
+        text_rect = text_surf.get_rect(center=rect.center)
+        self.screen.blit(text_surf, text_rect)
+        return rect
+
+    def draw_login_overlay(self, mouse_pos, bg, fg):
+        # UPRAVENO: Zmenšený a zjednodušený overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180) if self.is_dark_mode else (255, 255, 255, 180))
+        self.screen.blit(overlay, (0, 0))
+
+        # Nové poloviční rozměry
+        modal_w, modal_h = 250, 220
+        modal_x, modal_y = WIDTH // 2 - modal_w // 2, HEIGHT // 2 - modal_h // 2
+        modal_rect = pygame.Rect(modal_x, modal_y, modal_w, modal_h)
+        pygame.draw.rect(self.screen, bg, modal_rect)
+        pygame.draw.rect(self.screen, fg, modal_rect, 2)
+
+        # Tlačítko pro zavření
+        close_rect = pygame.Rect(modal_x + modal_w - 30, modal_y + 10, 20, 20)
+        close_text = self.font_input.render("[X]", True, fg)
+        self.screen.blit(close_text, close_text.get_rect(center=close_rect.center))
+
+        # Nadpis LOGIN
+        title_text = self.font_small.render("LOGIN", True, fg)
+        self.screen.blit(title_text, (modal_x + 15, modal_y + 15))
+
+        # Input boxy
+        user_rect = pygame.Rect(modal_x + 15, modal_y + 55, modal_w - 30, 35)
+        pass_rect = pygame.Rect(modal_x + 15, modal_y + 105, modal_w - 30, 35)
+
+        # Vykreslení User Inputu
+        pygame.draw.rect(self.screen, fg, user_rect, 2 if self.active_input != "username" else 4)
+        if self.username_text == "" and self.active_input != "username":
+            u_text = self.font_input.render("User", True, (100, 100, 100))
+        else:
+            u_text = self.font_input.render(self.username_text, True, fg)
+        self.screen.blit(u_text, (user_rect.x + 10, user_rect.y + 10))
+
+        # Vykreslení Pass Inputu
+        pygame.draw.rect(self.screen, fg, pass_rect, 2 if self.active_input != "password" else 4)
+        if self.password_text == "" and self.active_input != "password":
+            p_text = self.font_input.render("Password", True, (100, 100, 100))
+        else:
+            p_text = self.font_input.render("*" * len(self.password_text), True, fg)
+        self.screen.blit(p_text, (pass_rect.x + 10, pass_rect.y + 10))
+
+        # Vykreslení Submit tlačítka
+        submit_rect = pygame.Rect(modal_x + 15, modal_y + 160, modal_w - 30, 40)
+        hover = submit_rect.collidepoint(mouse_pos)
+        pygame.draw.rect(self.screen, fg, submit_rect, 0 if hover else 2)
+        s_text = self.font_input.render("Enter", True, bg if hover else fg)
+        self.screen.blit(s_text, s_text.get_rect(center=submit_rect.center))
+
+        return {
+            "close": close_rect, 
+            "user": user_rect, 
+            "pass": pass_rect, 
+            "submit": submit_rect
         }
-        exit;
-    }
-}
-// =========================================================
 
-$message = "";
-
-// --- LOGIKA: REGISTRACE ---
-if (isset($_POST['register'])) {
-    $u = trim($_POST['new_user']);
-    $p = password_hash($_POST['new_pass'], PASSWORD_DEFAULT);
-    try {
-        $stmt = $pdo->prepare("INSERT INTO users (username, password, score, difficulty) VALUES (?, ?, 0, '-')");
-        $stmt->execute([$u, $p]);
-        $message = "Registrace úspěšná! Nyní se přihlas.";
-    } catch (Exception $e) { $message = "Chyba: Uživatel již existuje."; }
-}
-
-// --- LOGIKA: PŘIHLÁŠENÍ ---
-if (isset($_POST['login'])) {
-    $u = $_POST['user'];
-    $p = $_POST['pass'];
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-    $stmt->execute([$u]);
-    $user_data = $stmt->fetch();
-    if ($user_data && password_verify($p, $user_data['password'])) {
-        $_SESSION['user_id'] = $user_data['id'];
-        $_SESSION['username'] = $user_data['username'];
-        $message = "Vítej, " . htmlspecialchars($u) . "!";
-    } else { $message = "Neplatné údaje."; }
-}
-
-if (isset($_GET['logout'])) { session_destroy(); header("Location: index_new_new.php"); exit; }
-
-$leaderboard = $pdo->query("SELECT username, score, difficulty FROM users ORDER BY score DESC LIMIT 10")->fetchAll();
-$theme = $_COOKIE['theme'] ?? 'dark';
-
-// Zjistíme na jaké podstránce se uživatel nachází
-$page = $_GET['page'] ?? 'main';
-?>
-
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <title>PONG ARCHIVE :: SYSTEM</title>
-    <style>
-        /* ÚPRAVA BAREV: --accent určuje barvu dříve tyrkysových nadpisů a zvýraznění */
-        :root { --bg: #050505; --txt: #00ff41; --dim: #003b00; --in: #001100; --accent: #ffff00; } /* Změněno na žlutou */
-        body.light-mode { --bg: #ffffff; --txt: #222222; --dim: #aaaaaa; --in: #f0f0f0; --accent: #cc0000; } /* Změněno na červenou */
-
-        body { background: var(--bg); color: var(--txt); font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; margin: 0; transition: 0.3s; padding-bottom: 50px;}
-        .ascii-header { white-space: pre; padding: 20px; text-align: center; font-weight: bold; line-height: 1.2; color: var(--txt); }
-        .ascii-header a { color: inherit; text-decoration: none; }
-        
-        nav { width: 100%; max-width: 900px; border-top: 1px solid var(--txt); border-bottom: 1px solid var(--txt); padding: 10px 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        
-        .btn { background: transparent; color: var(--txt); border: 1px solid var(--txt); padding: 8px 16px; cursor: pointer; font-family: inherit; transition: 0.2s; text-decoration: none; display: inline-block; text-align: center;}
-        .btn:hover { background: var(--txt); color: var(--bg); box-shadow: 0 0 10px var(--txt); }
-        .btn.active { background: var(--txt); color: var(--bg); font-weight: bold; }
-
-        .info-panel { width: 90%; max-width: 900px; border: 2px solid var(--txt); padding: 30px; position: relative; box-shadow: 5px 5px 0px var(--dim); margin-bottom: 30px; box-sizing: border-box; }
-        .info-panel h2 { text-align: center; border-bottom: 1px double var(--txt); padding-bottom: 10px; margin-top: 0; color: var(--accent); }
-        .terminal-prefix { color: var(--txt); font-weight: bold; margin-right: 10px; }
-
-        /* KARTY PRO MANUÁL A PŘEHLEDY */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { border: 1px solid var(--txt); background: rgba(0, 255, 65, 0.03); padding: 20px; position: relative; }
-        .card h3 { margin-top: 0; border-bottom: 1px dashed var(--dim); padding-bottom: 10px; color: var(--accent); font-size: 1.1em; }
-        .card ul { padding-left: 20px; margin-bottom: 0; }
-        .card li { margin-bottom: 8px; }
-        .card strong { color: var(--accent); }
-
-        /* KÓDOVÉ BLOKY */
-        pre { background: #111; border: 1px solid var(--dim); padding: 15px; overflow-x: auto; color: #ccc; font-family: 'Courier New', monospace; font-size: 0.85em; }
-        body.light-mode pre { background: #eee; color: #333; }
-        .code-comment { color: #888; font-style: italic; }
-        .code-keyword { color: #f06; font-weight: bold; }
-        .code-string { color: #0a0; }
-
-        .score-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .score-table th, .score-table td { border: 1px solid var(--txt); padding: 10px; text-align: left; }
-        .score-table th { background: var(--dim); color: var(--bg); }
-
-        .status-msg { color: yellow; margin: 10px; font-weight: bold; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 100; }
-        .modal-box { background: var(--bg); border: 3px double var(--txt); padding: 25px; width: 320px; text-align: center; }
-        .modal-box.wide { width: 600px; max-width: 90%; }
-        .modal-tabs { display: flex; margin-bottom: 20px; gap: 5px; }
-        .tab { flex: 1; padding: 5px; border: 1px solid var(--txt); cursor: pointer; font-size: 0.8em; }
-        .tab.active { background: var(--txt); color: var(--bg); }
-        input { width: 100%; background: var(--in); border: 1px solid var(--txt); color: var(--txt); padding: 8px; box-sizing: border-box; margin-top: 10px; font-family: inherit; }
-    </style>
-</head>
-<body class="<?php echo ($theme === 'light') ? 'light-mode' : ''; ?>">
-
-    <div class="ascii-header">
-<a href="?page=main">
-  _____   ___  _   _  ____ 
- |  __ \ / _ \| \ | |/ ___|
- | |__) | | | |  \| | |  _ 
- |  ___/| |_| | |\  | |_| |
- |_|     \___/|_| \_|\____|
-    [ SYSTEM ARCHIVE v1.8 ]
-</a>
-    </div>
-
-    <?php if($message): ?>
-        <div class="status-msg">> <?php echo $message; ?></div>
-    <?php endif; ?>
-
-    <nav>
-        <button class="btn" onclick="toggleTheme()">[ VZHLED ]</button>
-        <button class="btn" onclick="openLeaderboard()">[ DATABÁZE ]</button>
-        <a href="?page=investor" class="btn <?php echo $page=='investor'?'active':''; ?>">[ PREZENTACE PRO INVESTORA ]</a>
-        <a href="?page=worker" class="btn <?php echo $page=='worker'?'active':''; ?>">[ PŘEHLED PRO PRACOVNÍKA ]</a>
-        <?php if(isset($_SESSION['user_id'])): ?>
-            <a href="?logout=1" class="btn">[ ODHLÁSIT: <?php echo htmlspecialchars($_SESSION['username']); ?> ]</a>
-        <?php else: ?>
-            <button class="btn" onclick="openAuth()">[ LOGIN / REGISTER ]</button>
-        <?php endif; ?>
-    </nav>
-
-    <?php if ($page === 'main'): ?>
-        
-        <div class="info-panel">
-            <h2>-- DATABÁZE: PROJEKT PONG --</h2>
-            <p><span class="terminal-prefix">> IDENTIFIKACE:</span>Pong je považován za průkopníka videoherního průmyslu a první komerčně masově úspěšnou arkádovou hru. Pomohl etablovat společnost Atari jako giganta zábavního průmyslu a odstartoval takzvanou zlatou éru arkádových automatů. Přestože vycházel z dřívějšího konceptu elektronického stolního tenisu od Ralpha Baera, Pong jej dovedl k dokonalosti.</p>
-            <p><span class="terminal-prefix">> ROK SPUŠTĚNÍ:</span>Listopad 1972 (Atari). Arkádová verze slavila okamžitý úspěch. Domácí verze (tzv. "Home Pong"), která se připojovala přímo k televizoru, následovala koncem roku 1975 a stala se absolutním hitem tehdejší vánoční sezóny.</p>
-            <p><span class="terminal-prefix">> KONSTRUKTÉR:</span>Allan Alcorn. Zakladatel Atari, Nolan Bushnell, mu zadal vývoj Pongu pouze jako tréninkové cvičení. Alcorn neměl s videohrami žádné předchozí zkušenosti. Výsledek byl ale natolik zábavný a návykový, že se Bushnell rozhodl hru rovnou vydat a změnit tak herní historii.</p>
-            <p><span class="terminal-prefix">> INCIDENT 01 (Případ plné pokladničky):</span>První testovací prototyp automatu byl umístěn do lokálního baru Andy Capp's Tavern v Sunnyvale v Kalifornii. Po pouhých dvou dnech volal majitel baru do Atari s tím, že automat přestal fungovat. Při inspekci Alcorn zjistil, že systém neselhal technicky – mechanismus na mince byl pouze doslova přeplněný čtvrťáky, což způsobilo zablokování celého stroje. Lidé do něj naházeli přes 40 dolarů za pár dní.</p>
-            <p><span class="terminal-prefix">> DESIGN A HARDWARE:</span>Zajímavostí je, že původní Pong neobsahoval žádný kód, žádný mikroprocesor a žádnou systémovou paměť. Hra byla postavena čistě na úrovni hardwaru pomocí tzv. TTL obvodů (tranzistor-tranzistorová logika). Vizuálně postrádá jakékoli barvy a zvukové efekty – typické a ikonické "pípání" – nevznikly přes syntetizátor, ale generováním zvuků z frekvencí samotných synchronizačních obvodů monitoru.</p>
-        </div>
-
-        <div class="info-panel">
-            <h2>-- HERNÍ MANUÁL --</h2>
-            <p style="text-align:center; margin-bottom: 20px;">Technická specifikace ovládání a mechanik aktuálního buildu (v1.8).</p>
+    def run(self):
+        while True:
+            bg_color, fg_color = self.get_colors()
+            mouse_pos = pygame.mouse.get_pos()
             
-            <div class="card-grid">
-                <div class="card">
-                    <h3>> ZÁKLADNÍ OVLÁDÁNÍ</h3>
-                    <ul>
-                        <li><strong>Pohyb pálky:</strong> Použij klávesy <code>W / S</code> nebo <code>ŠIPKU NAHORU / DOLŮ</code> pro přesun po vertikální ose.</li>
-                        <li><strong>Menu a Přihlášení:</strong> V rozhraní menu používej pro klikání myš. Během přihlašování se mezi poli přepínáš klávesou <code>TAB</code> a mažeš pomocí <code>BACKSPACE</code>.</li>
-                        <li><strong>Ukončení (Nouzový únik):</strong> Klávesa <code>ESC</code>. Okamžitě ukončí probíhající hru, <strong>odešle aktuální skóre na server</strong> a vrátí tě do hlavního menu.</li>
-                    </ul>
-                </div>
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-                <div class="card">
-                    <h3>> NASTAVENÍ (SETTINGS)</h3>
-                    <ul>
-                        <li><strong>Vizuální režim:</strong> Systém plně podporuje přepínání mezi Dark Mode a Light Mode pro optimalizaci zátěže očí.</li>
-                        <li><strong>Obtížnost (Easy):</strong> Umělá inteligence je zpomalena na 50 % tvé rychlosti. Ideální pro nováčky.</li>
-                        <li><strong>Obtížnost (Normal):</strong> Rychlost AI je nastavena na 85 %. Poskytuje vyrovnaný zážitek.</li>
-                        <li><strong>Obtížnost (Hard):</strong> Umělá inteligence je o 20 % rychlejší než tvá loď. Vyžaduje absolutní soustředění.</li>
-                    </ul>
-                </div>
+                if event.type == pygame.KEYDOWN:
+                    if self.state == "PLAYING" and event.key == pygame.K_ESCAPE:
+                        self.api_save_score()
+                        self.state = "MENU"
+                    
+                    if self.state == "MENU" and self.show_login_overlay and self.active_input:
+                        if event.key == pygame.K_BACKSPACE:
+                            if self.active_input == "username":
+                                self.username_text = self.username_text[:-1]
+                            else:
+                                self.password_text = self.password_text[:-1]
+                        elif event.key == pygame.K_TAB:
+                            self.active_input = "password" if self.active_input == "username" else "username"
+                        elif event.unicode.isprintable():
+                            if self.active_input == "username" and len(self.username_text) < 20:
+                                self.username_text += event.unicode
+                            elif self.active_input == "password" and len(self.password_text) < 20:
+                                self.password_text += event.unicode
 
-                <div class="card">
-                    <h3>> HERNÍ MECHANIKY A CÍLE</h3>
-                    <ul>
-                        <li><strong>Zrychlování částic:</strong> S každým úspěšným odrazem se rychlost míčku plošně zvyšuje o 0.5 jednotek.</li>
-                        <li><strong>Fyzika odrazu:</strong> Úhel odrazu se počítá dynamicky podle toho, jak daleko od středu tvé pálky byl míček zasažen. (Čím více ke kraji, tím ostřejší úhel).</li>
-                        <li><strong>Cíl programu:</strong> Dostaň míček za záda AI oponenta. Hra končí v momentě, kdy jeden z hráčů dosáhne <strong>10 bodů</strong>. Systém následně automaticky zapíše výsledek do globální sítě (Databáze uživatelů).</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.state == "MENU":
+                        if self.show_login_overlay:
+                            rects = self.overlay_rects
+                            if rects.get("close", pygame.Rect(0,0,0,0)).collidepoint(mouse_pos):
+                                self.show_login_overlay = False
+                            elif rects.get("user", pygame.Rect(0,0,0,0)).collidepoint(mouse_pos):
+                                self.active_input = "username"
+                            elif rects.get("pass", pygame.Rect(0,0,0,0)).collidepoint(mouse_pos):
+                                self.active_input = "password"
+                            elif rects.get("submit", pygame.Rect(0,0,0,0)).collidepoint(mouse_pos):
+                                if self.api_login(self.username_text, self.password_text):
+                                    self.show_login_overlay = False
+                                    self.username_text = ""
+                                    self.password_text = ""
+                            else:
+                                self.active_input = None
+                        else:
+                            if self.btn_start.collidepoint(mouse_pos):
+                                self.reset_game()
+                                self.state = "PLAYING"
+                            elif self.btn_auth.collidepoint(mouse_pos):
+                                self.show_login_overlay = True
+                            elif self.btn_settings.collidepoint(mouse_pos):
+                                self.state = "SETTINGS"
+                            elif self.btn_exit.collidepoint(mouse_pos):
+                                pygame.quit()
+                                sys.exit()
+                            
+                    elif self.state == "SETTINGS":
+                        if self.btn_back.collidepoint(mouse_pos):
+                            self.state = "MENU"
+                        elif self.btn_theme.collidepoint(mouse_pos):
+                            self.is_dark_mode = not self.is_dark_mode
+                        elif self.btn_diff_easy.collidepoint(mouse_pos):
+                            self.difficulty = "easy"
+                        elif self.btn_diff_norm.collidepoint(mouse_pos):
+                            self.difficulty = "normal"
+                        elif self.btn_diff_hard.collidepoint(mouse_pos):
+                            self.difficulty = "hard"
 
-    <?php elseif ($page === 'investor'): ?>
+                    elif self.state == "GAME_OVER":
+                        if self.btn_menu.collidepoint(mouse_pos):
+                            self.state = "MENU"
 
-        <div class="info-panel">
-            <h2>-- PITCH DECK: PROJEKT PONG --</h2>
-            <p style="text-align:center; font-style: italic;">Potenciál, monetizace a budoucnost retro gamingu s moderním backendem.</p>
-            
-            <div class="card-grid">
-                <div class="card" style="grid-column: 1 / -1;">
-                    <h3>> Vize Projektu</h3>
-                    <p>Náš projekt "PONG ARCHIVE" neprodává jen hru, prodává <strong>nostalgii spojenou s moderní technologií</strong>. Podařilo se nám sjednotit estetiku úplně prvních herních automatů ze 70. let s robustní cloudovou infrastrukturou. Hra běží plynule v lokálním klientovi (Python/Pygame), ale veškerá data o uživatelích, zabezpečení a skóre se řeší na zabezpečeném webovém API.</p>
-                </div>
+            self.screen.fill(bg_color)
 
-                <div class="card">
-                    <h3>> Konkurenční Výhody</h3>
-                    <ul>
-                        <li><strong>Hybridní ekosystém:</strong> Python herní klient + PHP/MySQL webový portál.</li>
-                        <li><strong>Nativní AI adaptace:</strong> Oponent se přizpůsobuje chování hráče na základě 3 dynamických stupňů obtížnosti.</li>
-                        <li><strong>Okamžitá distribuce:</strong> Nízké hardwarové nároky zaručují běh i na kancelářských zařízeních.</li>
-                    </ul>
-                </div>
+            if self.state in ["MENU", "SETTINGS", "GAME_OVER"]:
+                self.update_background_ai()
+                overlay_color = (0, 0, 0, 150) if self.is_dark_mode else (255, 255, 255, 150)
+                self.draw_dashed_line(self.screen, (100, 100, 100))
+                self.bg_paddle1.draw(self.screen, (100, 100, 100))
+                self.bg_paddle2.draw(self.screen, (100, 100, 100))
+                self.bg_ball.draw(self.screen, (100, 100, 100))
+                overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+                overlay.fill(overlay_color)
+                self.screen.blit(overlay, (0, 0))
 
-                <div class="card">
-                    <h3>> Očekávaný růst a KPI</h3>
-                    <ul>
-                        <li>Rozšíření o online P2P multiplayer.</li>
-                        <li>Implementace in-game "skinů" pálek a částic za herní měnu (potenciální mikrotransakce).</li>
-                        <li>Integrace mobilní aplikace připojené na stejnou databázi.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+            if self.state == "MENU":
+                title = self.font_large.render("PONG", True, fg_color)
+                self.screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 150))
+                
+                user_label = "Nepřihlášen" if not self.logged_in_user else f"Hráč: {self.logged_in_user}"
+                u_surf = self.font_small.render(user_label, True, (255, 215, 0))
+                self.screen.blit(u_surf, (WIDTH // 2 - u_surf.get_width() // 2, 230))
 
-    <?php elseif ($page === 'worker'): ?>
+                self.btn_start = self.draw_button("Start", WIDTH//2 - 125, 300, 250, 50, mouse_pos)
+                self.btn_auth = self.draw_button("Login", WIDTH//2 - 125, 370, 250, 50, mouse_pos)
+                self.btn_settings = self.draw_button("Settings", WIDTH//2 - 125, 440, 250, 50, mouse_pos)
+                self.btn_exit = self.draw_button("Exit", WIDTH//2 - 125, 510, 250, 50, mouse_pos)
 
-        <div class="info-panel">
-            <h2>-- TECHNICKÁ DOKUMENTACE PRO VÝVOJÁŘE --</h2>
-            <p style="text-align:center;">Struktura projektu a správa herní logiky (Zdrojový kód: <code>pong_main_new.py</code>)</p>
+                if self.show_login_overlay:
+                    self.overlay_rects = self.draw_login_overlay(mouse_pos, bg_color, fg_color)
 
-            <div class="card-grid">
-                <div class="card" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div style="grid-column: 1 / -1;">
-                        <h3>> 1. ARCHITEKTURA A STRUKTURA TŘÍD</h3>
-                        <p>Kód je napsán objektově. Každý logický celek na obrazovce má svou vlastní třídu.</p>
-                    </div>
-                    <div>
-                        <strong>Třída Game:</strong>
-                        <p>Hlavní mozek ("Main Loop"). Udržuje herní stavy <code>MENU</code>, <code>PLAYING</code> a <code>GAME_OVER</code>. Řeší veškerou komunikaci přes knihovnu <code>requests</code> s webovým API.</p>
-                    </div>
-                    <div>
-                        <strong>Třída Paddle:</strong>
-                        <p>Kromě kreslení a kontroly mezí obrazovky obsahuje i funkci <code>ai_move()</code>, která řídí pohyb oponenta podle vybrané obtížnosti.</p>
-                    </div>
-                    <div>
-                        <strong>Třídy Ball & Particle:</strong>
-                        <p><code>Ball</code> řeší x/y vektory a reset do středu. <code>Particle</code> slouží jako jednoduchý vizuální emitor jisker po nárazu míčku do pálky.</p>
-                    </div>
-                </div>
+            elif self.state == "SETTINGS":
+                title = self.font_large.render("Settings", True, fg_color)
+                self.screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 150))
+                theme_text = "Light Mode" if self.is_dark_mode else "Dark Mode"
+                self.btn_theme = self.draw_button(f"Switch to {theme_text}", WIDTH//2 - 150, 250, 300, 50, mouse_pos)
+                diff_label = self.font_small.render(f"Difficulty: {self.difficulty.upper()}", True, fg_color)
+                self.screen.blit(diff_label, (WIDTH // 2 - diff_label.get_width() // 2, 330))
+                self.btn_diff_easy = self.draw_button("Easy", WIDTH//2 - 160, 380, 100, 40, mouse_pos)
+                self.btn_diff_norm = self.draw_button("Normal", WIDTH//2 - 50, 380, 100, 40, mouse_pos)
+                self.btn_diff_hard = self.draw_button("Hard", WIDTH//2 + 60, 380, 100, 40, mouse_pos)
+                self.btn_back = self.draw_button("Back", WIDTH//2 - 100, 500, 200, 50, mouse_pos)
 
-                <div class="card" style="grid-column: 1 / -1;">
-                    <h3>> 2. KLÍČOVÉ UKÁZKY KÓDU: Fyzika odrazu</h3>
-                    <p>Aby hra nebyla monotónní, míček se odráží pod různým úhlem v závislosti na tom, zda trefil střed pálky, nebo její kraj. Úryvek metody <code>bounce_off_paddle()</code>:</p>
-<pre>
-<span class="code-keyword">def</span> bounce_off_paddle(self, paddle):
-    <span class="code-comment"># Zjistíme rozdíl mezi středem pálky a středem míčku</span>
-    intersect_y = paddle.rect.centery - self.ball.rect.centery
-    normalized_intersect = intersect_y / (paddle.rect.height / 2)
-    
-    <span class="code-comment"># Výpočet úhlu (až 60 stupňů / pi/3 u kraje pálky)</span>
-    bounce_angle = normalized_intersect * (math.pi / 3) 
-    
-    <span class="code-comment"># Zrychlení hry s každým odrazem</span>
-    self.ball.speed += 0.5
-    
-    <span class="code-comment"># Aplikace nových vektorů</span>
-    direction = 1 <span class="code-keyword">if</span> self.ball.dx < 0 <span class="code-keyword">else</span> -1
-    self.ball.dx = math.cos(bounce_angle) * self.ball.speed * direction
-    self.ball.dy = -math.sin(bounce_angle) * self.ball.speed
-</pre>
-                </div>
+            elif self.state == "PLAYING":
+                keys = pygame.key.get_pressed()
+                self.player.move(keys[pygame.K_w] or keys[pygame.K_UP], keys[pygame.K_s] or keys[pygame.K_DOWN])
+                self.opponent.ai_move(self.ball, self.difficulty)
+                self.ball.update()
+                self.handle_collisions()
 
-                <div class="card" style="grid-column: 1 / -1;">
-                    <h3>> 3. KLÍČOVÉ UKÁZKY KÓDU: Komunikace se serverem</h3>
-                    <p>Pro uložení skóre do PHP backendu volá herní klient asynchronně metodu <code>api_save_score()</code> přes HTTP POST.</p>
-<pre>
-<span class="code-keyword">def</span> api_save_score(self):
-    <span class="code-keyword">if not</span> self.logged_in_user:
-        <span class="code-keyword">return</span>
-    
-    <span class="code-keyword">try</span>:
-        payload = {
-            <span class="code-string">"username"</span>: self.logged_in_user,
-            <span class="code-string">"password"</span>: self.logged_in_password,
-            <span class="code-string">"score"</span>: self.player.score,
-            <span class="code-string">"difficulty"</span>: self.difficulty
-        }
-        response = requests.post(<span class="code-string">f"{self.api_url}?api=savescore"</span>, json=payload)
-        <span class="code-keyword">print</span>(<span class="code-string">"API: Skóre odesláno na server."</span>)
-    <span class="code-keyword">except Exception as</span> e:
-        <span class="code-keyword">print</span>(<span class="code-string">f"API Chyba při ukládání: {e}"</span>)
-</pre>
-                </div>
+                if self.ball.rect.left <= 0:
+                    self.opponent.score += 1
+                    self.ball.reset()
+                if self.ball.rect.right >= WIDTH:
+                    self.player.score += 1
+                    self.ball.reset()
 
-            </div>
-        </div>
+                if self.player.score >= 10:
+                    self.winner = "Player"
+                    self.state = "GAME_OVER"
+                    self.api_save_score()
+                elif self.opponent.score >= 10:
+                    self.winner = "AI"
+                    self.state = "GAME_OVER"
+                    self.api_save_score()
 
-    <?php endif; ?>
+                for particle in self.particles[:]:
+                    particle.update()
+                    if particle.life <= 0:
+                        self.particles.remove(particle)
 
-    <div class="modal-overlay" id="leaderboardModal">
-        <div class="modal-box wide">
-            <button onclick="closeLeaderboard()" style="float:right; color:var(--txt); background:none; border:none; cursor:pointer; font-weight:bold;">[X]</button>
-            <h2 style="margin-top: 0; border-bottom: 1px double var(--txt); padding-bottom: 10px; color: var(--accent);">-- DATABÁZE UŽIVATELŮ --</h2>
-            <table class="score-table">
-                <thead>
-                    <tr><th>POŘADÍ</th><th>UŽIVATEL</th><th>SKÓRE</th><th>OBTÍŽNOST</th></tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Bezpečnostní kontrola pro prázdnou databázi
-                    if (!empty($leaderboard)):
-                        foreach($leaderboard as $i => $row): 
-                    ?>
-                    <tr>
-                        <td>#<?php echo $i+1; ?></td>
-                        <td><?php echo htmlspecialchars($row['username']); ?></td>
-                        <td><?php echo $row['score']; ?></td>
-                        <td><?php echo strtoupper(htmlspecialchars($row['difficulty'] ?? '-')); ?></td>
-                    </tr>
-                    <?php 
-                        endforeach;
-                    else:
-                    ?>
-                    <tr><td colspan="4" style="text-align: center;">Žádná data v databázi.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+                self.draw_dashed_line(self.screen, fg_color)
+                self.player.draw(self.screen, fg_color)
+                self.opponent.draw(self.screen, fg_color)
+                self.ball.draw(self.screen, fg_color)
+                for particle in self.particles:
+                    particle.draw(self.screen)
 
-    <div class="modal-overlay" id="authModal">
-        <div class="modal-box">
-            <button onclick="closeAuth()" style="float:right; color:var(--txt); background:none; border:none; cursor:pointer; font-weight:bold;">[X]</button>
-            <div style="clear:both; height:10px;"></div>
-            <div class="modal-tabs">
-                <div class="tab active" id="tab-l" onclick="switchTab('l')">LOGIN</div>
-                <div class="tab" id="tab-r" onclick="switchTab('r')">REGISTER</div>
-            </div>
+                score_p = self.font_large.render(str(self.player.score), True, fg_color)
+                score_o = self.font_large.render(str(self.opponent.score), True, fg_color)
+                self.screen.blit(score_p, (WIDTH // 4, 20))
+                self.screen.blit(score_o, (WIDTH * 3 // 4, 20))
 
-            <form id="f-login" method="POST">
-                <input type="text" name="user" placeholder="UŽIVATEL" required>
-                <input type="password" name="pass" placeholder="HESLO" required>
-                <button type="submit" name="login" class="btn" style="width:100%; margin-top:15px;">VSTOUPIT</button>
-            </form>
+            elif self.state == "GAME_OVER":
+                text = f"{self.winner} Wins!"
+                title = self.font_large.render(text, True, fg_color)
+                self.screen.blit(title, (WIDTH // 2 - title.get_width() // 2, HEIGHT // 2 - 100))
+                self.btn_menu = self.draw_button("Return to Menu", WIDTH//2 - 125, HEIGHT // 2, 250, 50, mouse_pos)
 
-            <form id="f-reg" method="POST" style="display:none">
-                <input type="text" name="new_user" placeholder="NOVÉ JMÉNO" required>
-                <input type="password" name="new_pass" placeholder="NOVÉ HESLO" required>
-                <button type="submit" name="register" class="btn" style="width:100%; margin-top:15px;">VYTVOŘIT ÚČET</button>
-            </form>
-        </div>
-    </div>
+            pygame.display.flip()
+            self.clock.tick(FPS)
 
-    <script>
-        function toggleTheme() {
-            const isLight = document.body.classList.toggle('light-mode');
-            document.cookie = "theme=" + (isLight ? 'light' : 'dark') + "; path=/; max-age=31536000";
-        }
-        
-        const authModal = document.getElementById('authModal');
-        const lbModal = document.getElementById('leaderboardModal');
-        
-        function openAuth() { authModal.style.display = 'flex'; }
-        function closeAuth() { authModal.style.display = 'none'; }
-        
-        function openLeaderboard() { lbModal.style.display = 'flex'; }
-        function closeLeaderboard() { lbModal.style.display = 'none'; }
+# ==========================================
+# --- UNIT TESTY (Herní mechaniky) ---
+# ==========================================
+class TestPongMechanics(unittest.TestCase):
+    def setUp(self):
+        # Inicializace objektů před každým testem
+        self.ball = Ball()
+        self.paddle = Paddle(10, HEIGHT // 2)
 
-        function switchTab(t) {
-            document.getElementById('f-login').style.display = t === 'l' ? 'block' : 'none';
-            document.getElementById('f-reg').style.display = t === 'r' ? 'block' : 'none';
-            document.getElementById('tab-l').classList.toggle('active', t === 'l');
-            document.getElementById('tab-r').classList.toggle('active', t === 'r');
-        }
-        
-        window.onclick = (e) => { 
-            if(e.target == authModal) closeAuth(); 
-            if(e.target == lbModal) closeLeaderboard(); 
-        }
-    </script>
-</body>
-</html>
+    def test_ball_reset(self):
+        """Testuje, zda se míček po resetu správně vrátí doprostřed obrazovky."""
+        self.ball.rect.x = 100
+        self.ball.rect.y = 100
+        self.ball.reset()
+        self.assertEqual(self.ball.rect.center, (WIDTH // 2, HEIGHT // 2))
+
+    def test_paddle_movement(self):
+        """Testuje, zda pálka správně reaguje na povel k pohybu dolů."""
+        start_y = self.paddle.rect.y
+        self.paddle.move(up=False, down=True)
+        self.assertGreater(self.paddle.rect.y, start_y)
+
+    def test_paddle_boundaries(self):
+        """Testuje, zda pálka nevyjede mimo horní okraj obrazovky."""
+        self.paddle.rect.y = 0
+        self.paddle.move(up=True, down=False)
+        self.assertEqual(self.paddle.rect.y, 0) # Neměla by se pohnout do mínusu
+
+# ==========================================
+# --- SPUŠTĚNÍ HRY NEBO TESTŮ ---
+# ==========================================
+if __name__ == "__main__":
+    # Pokud spustíš soubor s argumentem 'test' (např. python pong_main_final.py test)
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        unittest.main(argv=['first-arg-is-ignored'])
+    else:
+        # Jinak se spustí normální hra
+        game = Game()
+        game.run()
