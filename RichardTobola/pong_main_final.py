@@ -94,7 +94,7 @@ class Game:
         self.font_input = pygame.font.Font(None, 24) # UPRAVENO: Menší font pro inputy
 
         # --- API Konfigurace ---
-        self.api_url = "https://xeon.spskladno.cz/~tobolar/index_new_new.php" 
+        self.api_url = "https://xeon.spskladno.cz/~tobolar/index_main.php" 
         self.logged_in_user = None
         self.logged_in_password = None
 
