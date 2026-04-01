@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technická specifikace: Space Invaders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1115;
+            --sidebar: #161a1f;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --primary: #3b82f6;
+            --border: #2d333b;
+            --code-bg: #1e2227;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            line-height: 1.6;
+        }
+
+        aside {
+            width: 280px;
+            background-color: var(--sidebar);
+            height: 100vh;
+            position: fixed;
+            border-right: 1px solid var(--border);
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        aside h1 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        aside nav a {
+            display: block;
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 10px 0;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        aside nav a:hover { color: var(--text); }
+
+        main {
+            margin-left: 280px;
+            padding: 60px 100px;
+            max-width: 900px;
+        }
+
+        h2 { font-size: 2rem; margin-top: 60px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        h3 { font-size: 1.4rem; margin-top: 40px; color: var(--primary); }
+
+        p, li { font-size: 1.1rem; color: var(--text-dim); }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #f87171;
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        pre code { background: none; padding: 0; color: #60a5fa; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 40px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.8; }
+        
+        .back-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <h1>Space Invaders</h1>
+        <nav>
+            <a href="#architektura">1. Architektura</a>
+            <a href="#database">2. Databázový model</a>
+            <a href="#api">3. Síťové rozhraní</a>
+            <a href="#bezpecnost">4. Bezpečnost</a>
+        </nav>
+    </aside>
+
+    <main>
+        <a href="../index.php" class="back-link">← Zpět na portál</a>
+        <h2 id="architektura">Technická specifikace</h2>
+        <p>Tento dokument poskytuje detailní popis architektury, datových modelů a síťových protokolů použitých v projektu <strong>Space Invaders Enterprise</strong>.</p>
+
+        <h3 id="architektura">1. Systémová architektura</h3>
+        <p>Projekt využívá distribuovanou architekturu: <strong>Client-Server Bridge</strong>. Python engine funguje jako terminál, PHP servery jako centrální mozek pro validaci a MySQL jako perzistentní úložiště.</p>
+
+        <h3 id="database">2. Databázový model</h3>
+        <p>Využíváme relační model se dvěma provázanými tabulkami. Hesla jsou šifrována pomocí <code>BCRYPT</code>, což je standard pro moderní webové aplikace.</p>
+        <pre><code>CREATE TABLE s18_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    password VARCHAR(255)
+);</code></pre>
+
+        <h3 id="api">3. Síťové rozhraní (API)</h3>
+        <p>Komunikace probíhá asynchronně přes REST-like endpointy. Hra odesílá data po uzavření herní relace.</p>
+        <pre><code># Python Request Example:
+requests.post('save_score.php', data={'username': user, 'score': val})</code></pre>
+
+        <h3 id="bezpecnost">4. Implementace bezpečnosti</h3>
+        <p>Veškerý vstup do databáze je ošetřen pomocí <strong>PDO Prepared Statements</strong>, což eliminuje riziko SQL Injection útoků.</p>
+
+        <a href="dokumentace.md" download class="btn">Stáhnout dokumentaci (.md)</a>
+    </main>
+
+</body>
+</html>

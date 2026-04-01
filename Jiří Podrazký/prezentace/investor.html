@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Pitch: Space Invaders Enterprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --accent: #ff007f;
+            --dark: #0b0e14;
+            --glass: rgba(20, 25, 35, 0.85);
+        }
+
+        body {
+            background-color: var(--dark);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.1);
+        }
+
+        .accent-bg {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 10px 0;
+        }
+
+        h1 { font-size: 3.5rem; color: var(--primary); }
+        h2 { font-size: 2.2rem; color: #fff; }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #aaa;
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+
+        .card-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            width: 280px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .card h3 { color: var(--primary); margin-top: 0; font-size: 1.5rem; }
+        .card p { color: #ccc; font-size: 1rem; line-height: 1.5; }
+
+        .market-stats {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: box-shadow 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .footer {
+            padding: 40px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.3; }
+        }
+
+        .scanner {
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            position: absolute;
+            top: 0;
+            animation: moveScanner 4s infinite linear;
+            box-shadow: 0 0 15px var(--primary);
+            opacity: 0.2;
+        }
+
+        @keyframes moveScanner {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slide">
+        <div class="scanner"></div>
+        <div class="accent-bg" style="top: 20%; left: 20%;"></div>
+        <h1>Space Invaders</h1>
+        <h2>Enterprise Edition</h2>
+        <p class="tagline">Pokročilý obranný ekosystém pro moderní digitální éru. Budoucnost arkádových simulací je nyní.</p>
+        <div class="card-container">
+            <div class="card">
+                <h3>Scalability</h3>
+                <p>Python Engine s podporou pro neomezené množství instancí a cloudové scoreboardy.</p>
+            </div>
+            <div class="card">
+                <h3>Security</h3>
+                <p>Enterprise-grade hashing (BCRYPT) a šifrované API volání.</p>
+            </div>
+            <div class="card">
+                <h3>Visuals</h3>
+                <p>Moderní VFX částicový systém a glassmorphism design na webu.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="accent-bg" style="bottom: 20%; right: 20%;"></div>
+        <h2>Tržní Potenciál</h2>
+        <div class="market-stats">150M+</div>
+        <p class="tagline">Aktivních retro-hráčů na globálním trhu čeká na Enterprise řešení své nejoblíbenější klasiky.</p>
+        <ul style="text-align: left; color: #ccc; line-height: 2;">
+            <li>✔️ Integrovaný systém registrací zvyšující retenci</li>
+            <li>✔️ Možnost škálování na mobilní platformy</li>
+            <li>✔️ Monetizace přes unikátní modely lodí (Hangar)</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <h2>Chcete být součástí mise?</h2>
+        <p class="tagline">Hledáme strategického partnera pro expanzi do sektoru Enterprise Gamification.</p>
+        <a href="../index.php" class="btn">PROZKOUMAT NABÍDKU</a>
+        <div class="footer">Space Invaders Enterprise © 2026 - Defensive Solutions Ltd.</div>
+    </div>
+
+</body>
+</html>
