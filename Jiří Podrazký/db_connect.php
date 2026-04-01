@@ -1,9 +1,9 @@
 <?php
 // --- ÚDAJE OD ŠKOLY ---
-$host = 'dbs.spskladno.cz'; 
-$db   = 'vyuka18';     
-$user = 'student18';   
-$pass = 'spsnet'; // <--- ZKONTROLUJ HLAVNĚ TOTO
+$host = '***'; 
+$db   = '***';     
+$user = '***';   
+$pass = '***'; // <--- ZKONTROLUJ HLAVNĚ TOTO
 $charset = 'utf8mb4';
 
 $db_connected = false;
