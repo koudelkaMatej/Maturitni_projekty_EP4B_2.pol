@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird – Hlavní stránka</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky:    #0ea5e9;
+            --deep:   #0369a1;
+            --sun:    #fbbf24;
+            --green:  #22c55e;
+            --red:    #ef4444;
+            --ink:    #0f172a;
+            --muted:  #64748b;
+            --surface:#fff;
+            --border: #e2e8f0;
+            --bg:     #f0f9ff;
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: sticky; top:0; z-index:200;
+            width:100%;
+            background: linear-gradient(90deg, #0369a1 0%, #0284c7 100%);
+            display:flex; align-items:center;
+            padding: 0 24px; height:58px;
+            box-shadow: 0 4px 24px rgba(3,105,161,0.25);
+        }
+        .navbar-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight:800; font-size:1.1rem;
+            color:#fff; display:flex; align-items:center;
+            gap:8px; margin-right:18px; white-space:nowrap;
+        }
+        .navbar-logo .bird { font-size:1.3rem; }
+        .nav-sep { width:1px; height:20px; background:rgba(255,255,255,0.25); margin:0 6px; }
+        .nav-link {
+            padding:7px 14px; border-radius:8px;
+            font-weight:600; font-size:0.88rem;
+            text-decoration:none; color:rgba(255,255,255,0.8);
+            transition:.18s;
+        }
+        .nav-link:hover { background:rgba(255,255,255,0.15); color:#fff; }
+        .nav-link.active { background:rgba(255,255,255,0.2); color:#fff; }
+
+        /* user badge in navbar */
+        .nav-user {
+            margin-left:auto;
+            display:flex; align-items:center; gap:10px;
+        }
+        #nav-username {
+            font-weight:700; font-size:0.88rem;
+            color:var(--sun); display:none;
+        }
+        #nav-logout {
+            padding:6px 14px; border-radius:8px; border:none;
+            background:rgba(255,255,255,0.15); color:#fff;
+            font-weight:700; font-size:0.82rem; cursor:pointer;
+            font-family:inherit; display:none; transition:.18s;
+        }
+        #nav-logout:hover { background:rgba(255,255,255,0.28); }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(160deg, #0ea5e9 0%, #0284c7 50%, #075985 100%);
+            padding: 52px 20px 40px;
+            text-align:center; position:relative; overflow:hidden;
+        }
+        .hero::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(251,191,36,0.12) 0%, transparent 50%);
+        }
+        .hero h1 {
+            font-family:'Syne', sans-serif; font-weight:800;
+            font-size:clamp(2rem, 5vw, 3rem);
+            color:#fff; letter-spacing:-1px;
+            position:relative;
+        }
+        .hero h1 .bird { margin-right:8px; }
+        .hero p {
+            color:rgba(255,255,255,0.75); margin-top:8px;
+            font-size:1rem; position:relative;
+        }
+        .hero-badge {
+            display:inline-block; margin-top:14px;
+            background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+            color:#fff; padding:5px 16px; border-radius:99px;
+            font-size:0.82rem; font-weight:600; position:relative;
+        }
+
+        /* ── TABS ── */
+        .tabs-wrap {
+            display:flex; justify-content:center;
+            padding: 24px 20px 0;
+        }
+        .tabs {
+            display:flex; background:#dbeafe;
+            border-radius:14px; padding:5px; gap:3px;
+        }
+        .tab-btn {
+            border:none; padding:11px 22px; border-radius:10px;
+            font-weight:700; font-size:0.88rem; cursor:pointer;
+            background:transparent; color:var(--muted);
+            transition:.18s; font-family:inherit;
+        }
+        .tab-btn.active {
+            background:#fff; color:var(--deep);
+            box-shadow:0 4px 12px rgba(3,105,161,0.14);
+        }
+        .tab-btn:hover:not(.active) { background:rgba(255,255,255,0.6); color:var(--ink); }
+
+        /* ── MAIN ── */
+        main { max-width:780px; margin:0 auto; padding:28px 20px 80px; }
+        .section { display:none; animation:up .3s ease; }
+        .section.active { display:block; }
+        @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+        /* ── CARD ── */
+        .card {
+            background:var(--surface); border:1px solid var(--border);
+            border-radius:20px; padding:32px;
+            box-shadow:0 4px 24px rgba(0,0,0,0.06); margin-bottom:20px;
+        }
+        .card-title {
+            font-family:'Syne',sans-serif; font-weight:800;
+            font-size:1.3rem; margin-bottom:24px;
+            display:flex; align-items:center; gap:10px;
+        }
+
+        /* ── AUTH ── */
+        .auth-tabs {
+            display:flex; gap:0; margin-bottom:24px;
+            border-radius:10px; overflow:hidden; border:1px solid var(--border);
+        }
+        .auth-tab {
+            flex:1; padding:12px; text-align:center;
+            border:none; background:#f8fafc;
+            font-weight:700; font-size:0.9rem; cursor:pointer;
+            font-family:inherit; color:var(--muted); transition:.18s;
+        }
+        .auth-tab.active { background:var(--deep); color:#fff; }
+
+        .form-group { margin-bottom:16px; }
+        .form-group label {
+            display:block; font-size:0.86rem; font-weight:600;
+            margin-bottom:6px; color:var(--muted);
+        }
+        .form-group input {
+            width:100%; padding:13px 16px; border-radius:12px;
+            border:1.5px solid var(--border); font-family:inherit;
+            font-size:0.97rem; transition:.2s; background:#fcfcfd;
+            color:var(--ink);
+        }
+        .form-group input:focus {
+            border-color:var(--sky); outline:none;
+            box-shadow:0 0 0 3px rgba(14,165,233,0.12);
+        }
+        .btn-primary {
+            width:100%; padding:14px; border-radius:12px; border:none;
+            background:linear-gradient(135deg, var(--sky), var(--deep));
+            color:#fff; font-weight:700; font-size:1rem;
+            cursor:pointer; transition:.2s; font-family:inherit;
+        }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(3,105,161,0.3); }
+        .btn-primary:active { transform:none; }
+
+        /* logged-in state inside auth card */
+        .logged-in-box {
+            text-align:center; padding:20px 0; display:none;
+        }
+        .logged-in-box .avatar {
+            width:72px; height:72px; border-radius:50%;
+            background:linear-gradient(135deg, var(--sky), var(--deep));
+            display:flex; align-items:center; justify-content:center;
+            font-size:2rem; margin:0 auto 14px;
+        }
+        .logged-in-box h3 { font-size:1.3rem; margin-bottom:4px; }
+        .logged-in-box p { color:var(--muted); font-size:0.9rem; margin-bottom:20px; }
+        .btn-secondary {
+            padding:11px 28px; border-radius:12px; border:1.5px solid var(--border);
+            background:#fff; color:var(--ink); font-weight:700; font-size:0.9rem;
+            cursor:pointer; font-family:inherit; transition:.18s;
+        }
+        .btn-secondary:hover { border-color:var(--sky); color:var(--sky); }
+
+        /* ── LEADERBOARD ── */
+        .lb-header {
+            display:grid; grid-template-columns:48px 1fr 120px;
+            padding:8px 12px; font-size:0.78rem; font-weight:700;
+            color:var(--muted); text-transform:uppercase; letter-spacing:.8px;
+            border-bottom:1px solid var(--border); margin-bottom:4px;
+        }
+        .lb-row {
+            display:grid; grid-template-columns:48px 1fr 120px;
+            padding:15px 12px; border-radius:12px;
+            align-items:center; transition:.15s;
+        }
+        .lb-row:hover { background:#f8fafc; }
+        .lb-row.top1 { background:linear-gradient(90deg,#fef9c3,#fff); }
+        .lb-row.top2 { background:linear-gradient(90deg,#f1f5f9,#fff); }
+        .lb-row.top3 { background:linear-gradient(90deg,#fef3c7,#fff); }
+        .lb-rank { font-weight:800; font-size:1.1rem; }
+        .lb-name { font-weight:600; }
+        .lb-diff { font-size:0.76rem; font-weight:700; color:var(--muted); margin-top:2px; }
+        .lb-score {
+            text-align:right; font-weight:800;
+            font-size:1.05rem; color:var(--deep);
+        }
+        .tag { padding:3px 9px; border-radius:6px; font-size:0.72rem; font-weight:800; display:inline-block; margin-top:2px; }
+        .tag-easy   { background:#dcfce7; color:#15803d; }
+        .tag-normal { background:#fef3c7; color:#b45309; }
+        .tag-hard   { background:#fee2e2; color:#dc2626; }
+        .empty-state {
+            text-align:center; padding:48px 20px; color:var(--muted);
+            font-size:1rem;
+        }
+        .empty-state .icon { font-size:3rem; margin-bottom:12px; }
+
+        /* ── INFO ── */
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; }
+        .info-box { padding:18px; background:#f8fafc; border:1px solid var(--border); border-radius:14px; }
+        .info-box h3 { font-size:0.78rem; text-transform:uppercase; letter-spacing:.8px; color:var(--sky); font-weight:700; margin-bottom:8px; }
+        .info-box p { font-size:0.9rem; color:var(--muted); line-height:1.55; }
+        .key-chip { display:inline-block; padding:4px 10px; background:#e2e8f0; border-bottom:3px solid #94a3b8; border-radius:7px; font-weight:800; font-size:0.8rem; margin-top:8px; margin-right:4px; }
+        .diff-table { width:100%; border-collapse:collapse; }
+        .diff-table th { text-align:left; padding:10px; font-size:0.78rem; color:var(--muted); font-weight:600; border-bottom:1px solid var(--border); }
+        .diff-table td { padding:13px 10px; border-bottom:1px solid #f1f5f9; }
+        .tech-list { list-style:none; }
+        .tech-list li { padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:0.93rem; color:var(--muted); display:flex; align-items:center; gap:10px; }
+        .tech-list li:last-child { border:none; }
+        .tech-list strong { color:var(--ink); }
+
+        /* ── TOAST ── */
+        #toast {
+            position:fixed; top:72px; right:20px; z-index:9999;
+            padding:14px 22px; border-radius:14px; color:#fff;
+            font-weight:700; font-size:0.9rem;
+            box-shadow:0 20px 40px rgba(0,0,0,0.15);
+            display:none; max-width:320px;
+            animation:slideIn .3s ease;
+        }
+        @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:none} }
+        .toast-success { background:var(--green); }
+        .toast-error   { background:var(--red); }
+        .toast-info    { background:var(--deep); }
+
+        /* refresh btn */
+        .btn-icon {
+            border:none; background:#f1f5f9; border-radius:10px;
+            padding:8px 12px; cursor:pointer; font-size:1rem;
+            transition:.18s; margin-left:auto; display:block;
+        }
+        .btn-icon:hover { background:#dbeafe; }
+        .lb-top-row { display:flex; align-items:center; margin-bottom:4px; }
+
+        @media (max-width:600px) {
+            .info-grid { grid-template-columns:1fr; }
+            .tabs { gap:1px; }
+            .tab-btn { padding:10px 14px; font-size:0.82rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-logo">
+        <span class="bird">🐦</span>Flappy Bird
+    </div>
+    <div class="nav-sep"></div>
+    <a href="/" class="nav-link active">🏠 Hlavní</a>
+    <a href="/popis.html" class="nav-link">📖 Manuál</a>
+
+    <div class="nav-user">
+        <span id="nav-username"></span>
+        <button id="nav-logout" onclick="odhlasit()">Odhlásit</button>
+    </div>
+</nav>
+
+<div id="toast"></div>
+
+<div class="hero">
+    <h1><span class="bird">🐦</span>Flappy Bird</h1>
+    <p>Maturitní projekt 2025 · Python + Flask</p>
+    <span class="hero-badge">✈️ Lokální server · port 5000</span>
+</div>
+
+<div class="tabs-wrap">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showSection('leaderboard')">🏆 Žebříček</button>
+        <button class="tab-btn" onclick="showSection('auth')">👤 Účet</button>
+        <button class="tab-btn" onclick="showSection('info')">📖 O hře</button>
+    </div>
+</div>
+
+<main>
+    <!-- ── LEADERBOARD ── -->
+    <div id="section-leaderboard" class="section active">
+        <div class="card">
+            <div class="lb-top-row">
+                <div class="card-title" style="margin-bottom:0">🏆 Nejlepší hráči</div>
+                <button class="btn-icon" onclick="nactiSkore()" title="Obnovit">🔄</button>
+            </div>
+            <div style="height:1px;background:var(--border);margin:18px 0"></div>
+            <div class="lb-header"><span>#</span><span>Hráč</span><span style="text-align:right">Skóre</span></div>
+            <div id="lb-body"><div class="empty-state"><div class="icon">⏳</div><p>Načítám žebříček…</p></div></div>
+        </div>
+    </div>
+
+    <!-- ── AUTH ── -->
+    <div id="section-auth" class="section">
+        <div class="card">
+            <div class="card-title">👤 Účet</div>
+
+            <!-- logged-in view -->
+            <div class="logged-in-box" id="logged-in-box">
+                <div class="avatar">🐦</div>
+                <h3 id="logged-in-name">Uživatel</h3>
+                <p>Jsi přihlášen/a. Spusť hru a bojuj o místo v žebříčku!</p>
+                <button class="btn-secondary" onclick="odhlasit()">Odhlásit se</button>
+            </div>
+
+            <!-- form view -->
+            <div id="auth-form-wrap">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tab-login"    onclick="switchAuthTab('login')">Přihlásit se</button>
+                    <button class="auth-tab"         id="tab-register" onclick="switchAuthTab('register')">Registrovat se</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Uživatelské jméno</label>
+                    <input type="text" id="username" placeholder="Zadejte jméno" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Heslo</label>
+                    <input type="password" id="password" placeholder="Minimálně 3 znaky" autocomplete="current-password"
+                           onkeydown="if(event.key==='Enter')handleAuth()">
+                </div>
+                <button class="btn-primary" onclick="handleAuth()" id="auth-btn">Přihlásit se</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── INFO ── -->
+    <div id="section-info" class="section">
+        <div class="card">
+            <div class="card-title">📖 O projektu</div>
+            <p style="color:var(--muted);margin-bottom:22px;line-height:1.7;font-size:0.95rem;">
+                Moderní remake klasiky Flappy Bird jako maturitní práce. Desktopová hra v Pythonu/Pygame komunikuje
+                s lokálním Flask serverem pro sdílení výsledků online.
+            </p>
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3>🎮 Ovládání</h3>
+                    <p>Stiskni klávesu pro mávnutí křídly a vyhýbej se trubkám.</p>
+                    <span class="key-chip">Mezerník</span>
+                    <span class="key-chip">↑</span>
+                </div>
+                <div class="info-box">
+                    <h3>💾 Skóre</h3>
+                    <p>Po hře se uloží jen tvůj <strong>nejlepší výsledek</strong>. Horší skóre se nepřepíše.</p>
+                </div>
+                <div class="info-box">
+                    <h3>🔐 Registrace</h3>
+                    <p>Vytvoř si účet na webu. Bez přihlášení hru spustit nelze.</p>
+                </div>
+                <div class="info-box">
+                    <h3>🌐 Server</h3>
+                    <p>Spusť <code style="background:#f1f5f9;padding:2px 5px;border-radius:4px">server.py</code> a otevři <strong>localhost:5000</strong></p>
+                </div>
+            </div>
+
+            <div class="card-title" style="margin-top:8px">⚙️ Obtížnosti</div>
+            <table class="diff-table">
+                <thead><tr><th>Úroveň</th><th>Rychlost</th><th>Gravitace</th><th>Mezera</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="tag tag-easy">EASY</span></td><td>2.5</td><td>0.30</td><td>180 px</td></tr>
+                    <tr><td><span class="tag tag-normal">NORMAL</span></td><td>3.5</td><td>0.45</td><td>150 px</td></tr>
+                    <tr><td><span class="tag tag-hard">HARD</span></td><td>5.0</td><td>0.60</td><td>120 px</td></tr>
+                </tbody>
+            </table>
+
+            <div class="card-title" style="margin-top:28px">🛠️ Technologie</div>
+            <ul class="tech-list">
+                <li>🐍 <strong>Python 3.11+</strong> – herní logika</li>
+                <li>🎮 <strong>Pygame</strong> – grafika a animace</li>
+                <li>🌐 <strong>Flask</strong> – webový server a REST API</li>
+                <li>📄 <strong>JSON</strong> – databáze uživatelů a skóre</li>
+                <li>🖥️ <strong>HTML/CSS/JS</strong> – webové rozhraní</li>
+            </ul>
+
+            <div class="card-title" style="margin-top:36px">🗄️ ER Diagram</div>
+            <p style="color:var(--muted);font-size:0.9rem;margin-bottom:14px;line-height:1.6;">
+                Datový model projektu — vztahy mezi tabulkami uživatelů, skóre a nastavení.
+            </p>
+            <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#0d1b2a;">
+                <img src="/er.png" alt="ER Diagram – Flappy Bird"
+                     style="width:100%;height:auto;display:block;">
+            </div>
+
+            <div class="card-title" style="margin-top:36px">📊 Vývojové diagramy</div>
+            <p style="color:var(--muted);font-size:0.9rem;margin-bottom:14px;line-height:1.6;">
+                Vývojové diagramy zachycují tok programu — od spuštění hry po uložení výsledku.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#f8fafc;">
+                    <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">
+                        Diagram 1
+                    </div>
+                    <img src="/vyvojovydia1.png" alt="Vývojový diagram 1"
+                         style="width:100%;height:auto;display:block;"
+                         onerror="this.parentElement.innerHTML='<div style=\"padding:40px;text-align:center;color:var(--muted);font-size:0.85rem;\">⏳ Přidej soubor<br><strong>vyvojovydia1.png</strong></div>'">
+                </div>
+                <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#f8fafc;">
+                    <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">
+                        Diagram 2
+                    </div>
+                    <img src="/vyvojovydia2.png" alt="Vývojový diagram 2"
+                         style="width:100%;height:auto;display:block;"
+                         onerror="this.parentElement.innerHTML='<div style=\"padding:40px;text-align:center;color:var(--muted);font-size:0.85rem;\">⏳ Přidej soubor<br><strong>vyvojovydia2.png</strong></div>'">
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let currentUser = null;
+let authMode = 'login'; // 'login' | 'register'
+
+// Obnov session ze sessionStorage
+(function initSession() {
+    const saved = sessionStorage.getItem('flappy_user');
+    if (saved) {
+        currentUser = saved;
+        updateNavUser();
+        updateAuthCard();
+    }
+})();
+
+// ── Nav ───────────────────────────────────────────────────────────────────
+function updateNavUser() {
+    const el = document.getElementById('nav-username');
+    const btn = document.getElementById('nav-logout');
+    if (currentUser) {
+        el.textContent = '👤 ' + currentUser;
+        el.style.display = 'block';
+        btn.style.display = 'block';
+    } else {
+        el.style.display = 'none';
+        btn.style.display = 'none';
+    }
+}
+
+function odhlasit() {
+    currentUser = null;
+    sessionStorage.removeItem('flappy_user');
+    updateNavUser();
+    updateAuthCard();
+    showToast('Byl/a jsi odhlášen/a.', 'info');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if (name === 'leaderboard') nactiSkore();
+}
+
+// ── Auth tabs ─────────────────────────────────────────────────────────────
+function switchAuthTab(mode) {
+    authMode = mode;
+    document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+    document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+    document.getElementById('auth-btn').textContent = mode === 'login' ? 'Přihlásit se' : 'Registrovat se';
+}
+
+function updateAuthCard() {
+    const formWrap = document.getElementById('auth-form-wrap');
+    const loggedBox = document.getElementById('logged-in-box');
+    if (currentUser) {
+        formWrap.style.display = 'none';
+        loggedBox.style.display = 'block';
+        document.getElementById('logged-in-name').textContent = currentUser;
+    } else {
+        formWrap.style.display = 'block';
+        loggedBox.style.display = 'none';
+    }
+}
+
+// ── Auth handler ──────────────────────────────────────────────────────────
+async function handleAuth() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+
+    if (!user || !pass) { showToast('Vyplň všechny údaje!', 'error'); return; }
+
+    const btn = document.getElementById('auth-btn');
+    btn.disabled = true; btn.textContent = '⏳ Čekej…';
+
+    try {
+        if (authMode === 'register') {
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Registrace úspěšná! Nyní se přihlaš. 🎉', 'success');
+                switchAuthTab('login');
+            } else {
+                showToast(data.message, 'error');
+            }
+        } else {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            const data = await res.json();
+            if (data.success) {
+                currentUser = data.username;
+                sessionStorage.setItem('flappy_user', currentUser);
+                updateNavUser();
+                updateAuthCard();
+                showToast(`Vítej zpět, ${currentUser}! 🐦`, 'success');
+                document.getElementById('password').value = '';
+            } else {
+                showToast(data.message, 'error');
+            }
+        }
+    } catch {
+        showToast('Server není dostupný. Spusť server.py!', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = authMode === 'login' ? 'Přihlásit se' : 'Registrovat se';
+    }
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────
+async function nactiSkore() {
+    const body = document.getElementById('lb-body');
+    body.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Načítám…</p></div>';
+    try {
+        const res  = await fetch('/api/scores');
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+            body.innerHTML = '<div class="empty-state"><div class="icon">🏁</div><p>Zatím nikdo nehrál.<br>Buď první!</p></div>';
+            return;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        const diffTag = d => `<span class="tag tag-${d||'normal'}">${(d||'normal').toUpperCase()}</span>`;
+        const topClass = i => i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+
+        body.innerHTML = data.slice(0, 10).map((z, i) => `
+            <div class="lb-row ${topClass(i)}">
+                <span class="lb-rank">${medals[i] || (i + 1) + '.'}</span>
+                <span>
+                    <div class="lb-name">${escHtml(z.name)}</div>
+                    <div class="lb-diff">${diffTag(z.difficulty)}</div>
+                </span>
+                <span class="lb-score">${z.score} b.</span>
+            </div>
+        `).join('');
+    } catch {
+        body.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p style="color:var(--red)">Server není dostupný.<br>Spusť server.py!</p></div>';
+    }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function showToast(text, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = text;
+    t.className = `toast-${type}`;
+    t.style.display = 'block';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.display = 'none'; }, 4500);
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Init
+nactiSkore();
+</script>
+</body>
+</html>
