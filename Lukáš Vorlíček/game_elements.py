@@ -5,15 +5,17 @@ class Piece:
         self.grid = grid
         self.shape = settings.SHAPES[index]
         self.color = settings.SHAPE_COLORS[index]
-        self.x = settings.COLUMNS // 2 - len(self.shape[0]) // 2
+        self.x = settings.COLUMNS // 2 - len(self.shape[0]) // 2 # Vycentrování na startu
         self.y = 0
 
     def rotate(self):
+        # Rotace
         old = self.shape
         self.shape = [list(row) for row in zip(*self.shape[::-1])]
         if not self.valid(): self.shape = old
 
     def valid(self, dx=0, dy=0):
+        # Detekce kolizí
         for y, row in enumerate(self.shape):
             for x, cell in enumerate(row):
                 if cell:
@@ -33,6 +35,7 @@ class Button:
         self.text, self.font, self.color = text, font, color
 
     def draw(self, win):
+        # Dynamická změna barvy
         m = pygame.mouse.get_pos()
         h = self.rect.collidepoint(m)
         pygame.draw.rect(win, (30,30,30) if h else (15,15,15), self.rect, border_radius=10)

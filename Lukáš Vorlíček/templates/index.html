@@ -1,32 +1,97 @@
 {% extends "base.html" %}
-{% block title %}Hlavní Menu{% endblock %}
+
+{% block title %}Domů | Technická Dokumentace{% endblock %}
 
 {% block content %}
-<div style="text-align: center; max-width: 900px;">
-    <h1>NEON TETRIS 2026</h1>
-    <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 40px;">
-        Ponořte se do moderní interpretace legendární arkády.
-    </p>
+<div class="container">
+    <h1 style="text-align: center; margin-bottom: 40px; text-shadow: 0 0 20px var(--primary);">
+        Dokumentace Projektu Neon Tetris
+    </h1>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: left;">
-        <div class="container" style="padding: 25px;">
-            <h2 style="color:var(--primary); margin-top:0;">O PROJEKTU</h2>
-            <p style="color:gray; line-height:1.6;">Tato aplikace propojuje herní engine v <b>Pygame</b> s webovým rozhraním <b>Flask</b> a <b>SQLite</b> databází. Tato kombinace nám umožňuje zapisovat zobrazovat výsledky ze hry přes databázi na webové stránce.</p>
+    <div style="display: flex; gap: 30px; justify-content: center; align-items: stretch; margin-bottom: 50px; flex-wrap: wrap;">
+
+        <div style="flex: 1; min-width: 350px; text-align: center; display: flex; flex-direction: column;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">VÝVOJOVÝ DIAGRAM</h3>
+            <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 0 40px rgba(0, 242, 255, 0.15); flex-grow: 1; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ url_for('static', filename='flowchart.png') }}" alt="Logika hry" style="max-width: 100%; height: auto;">
+            </div>
+            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 10px;">Popis algoritmu herní smyčky a rozhodovacích procesů.</p>
         </div>
 
-        <div class="container" style="padding: 25px;">
-            <h2 style="color:var(--primary); margin-top:0;">OVLÁDÁNÍ</h2>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;"><span>Pohyb</span><b style="color:var(--accent)">ŠIPKY</b></div>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;"><span>Rotace</span><b style="color:var(--accent)">ŠIPKA NAHORU</b></div>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;"><span>Pád</span><b style="color:var(--accent)">ŠIPKA DOLU</b></div>
+        <div style="flex: 1; min-width: 350px; text-align: center; display: flex; flex-direction: column;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">ER DIAGRAM</h3>
+            <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); flex-grow: 1; display: flex; flex-direction: column;">
+                <img src="{{ url_for('static', filename='er_diagram.png') }}" alt="Struktura databáze" style="max-width: 100%; height: auto; border-radius: 10px; margin-bottom: 20px;">
+
+                <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border-left: 3px solid var(--secondary);">
+                    <p style="margin-top: 0;"><strong>Relační struktura:</strong></p>
+                    <ul style="margin-bottom: 0; padding-left: 20px;">
+                        <li><strong>Vztah 1:N</strong> – Uživatel může mít v databázi uloženo více výsledků skóre.</li>
+                        <li><strong>Referenční integrita</strong> – Zajištěna pomocí cizího klíče (FK) <code>user_id</code>.</li>
+                        <li><strong>Unikátnost</strong> – Username je unikátní klíč (UNIQUE), což zabraňuje duplicitám.</li>
+                    </ul>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 10px;">Logické schéma datové vrstvy aplikace.</p>
         </div>
     </div>
 
-    <div style="margin-top: 60px; padding-bottom: 50px;">
-        <h2 style="color:var(--primary)">Struktura Databáze (ER Diagram)</h2>
-        <div style="border: 2px solid var(--secondary); border-radius: 30px; padding: 10px; display: inline-block; margin-top: 20px;">
-            <img src="{{ url_for('static', filename='er_diagram.png') }}" alt="ER Diagram" style="max-width:600px; border-radius:20px; display:block;">
+    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 60px 0;">
+
+    <h2 style="text-align: center; color: var(--accent); margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px;">
+        Hloubková analýza implementace
+    </h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px;">
+
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border-top: 2px solid var(--primary);">
+            <h3 style="color: var(--primary);">01 / Backend & Autentizace</h3>
+            <p style="color: rgba(255,255,255,0.7);">Registrace a přihlašování využívá <code>Flask Sessions</code> pro bezpečné udržení stavu uživatele. SQL dotazy jsou parametrizovány pro ochranu proti SQL Injection.</p>
+            <div style="margin-top: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                <img src="{{ url_for('static', filename='code_db.png') }}" alt="Kód DB" style="width: 100%; display: block;">
+            </div>
         </div>
+
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border-top: 2px solid var(--secondary);">
+            <h3 style="color: var(--secondary);">02 / Randomizační Algoritmus</h3>
+            <p style="color: rgba(255,255,255,0.7);">Využívám <strong>7-Bag systém</strong>, který simuluje losování ze sáčku. Zaručuje, že hráč dostane každou ze sedmi kostek právě jednou v rámci jedné sady.</p>
+            <div style="margin-top: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                <img src="{{ url_for('static', filename='code_bag.png') }}" alt="Kód Bagu" style="width: 100%; display: block;">
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border-top: 2px solid var(--accent);">
+            <h3 style="color: var(--accent);">03 / Geometrické Kolize</h3>
+            <p style="color: rgba(255,255,255,0.7);">Funkce <code>valid()</code> provádí analýzu herního pole. Kontroluje matici mřížky dříve, než dovolí překreslení objektu na novou souřadnici.</p>
+            <div style="margin-top: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                <img src="{{ url_for('static', filename='code_collision.png') }}" alt="Kód kolizí" style="width: 100%; display: block;">
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border-top: 2px solid var(--primary);">
+            <h3 style="color: var(--primary);">04 / Bodová Progrese</h3>
+            <p style="color: rgba(255,255,255,0.7);">Bodování je nelineární a dynamicky se škáluje s levelem. Systém odměňuje riskování pomocí vysokých multiplikátorů za více řad najednou.</p>
+            <div style="margin-top: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                <img src="{{ url_for('static', filename='code_score.png') }}" alt="Kód bodování" style="width: 100%; display: block;">
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border-top: 2px solid var(--secondary);">
+            <h3 style="color: var(--secondary);">05 / Dynamická Gradace</h3>
+            <p style="color: rgba(255,255,255,0.7);">Obtížnost je řízena algoritmem, který s každým levelem zkracuje interval pádu kostky, čímž progresivně zvyšuje nároky na reakční dobu hráče.</p>
+            <div style="margin-top: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                <img src="{{ url_for('static', filename='code_speed.png') }}" alt="Kód rychlosti" style="width: 100%; display: block;">
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border-top: 2px solid var(--accent);">
+            <h3 style="color: var(--accent);">06 / UI Design & Layout</h3>
+            <p style="color: rgba(255,255,255,0.7);">Karty využívají moderní <strong>CSS Grid</strong> pro responzivitu. Styl "Glassmorphism" tvoří poloprůhledné pozadí s neonovým ohraničením (border-top) pro vizuální oddělení témat.</p>
+            <div style="margin-top: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #333;">
+                <img src="{{ url_for('static', filename='code_ui.png') }}" alt="Kód UI" style="width: 100%; display: block;">
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}

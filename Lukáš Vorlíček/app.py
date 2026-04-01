@@ -2,16 +2,19 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3, database
 
 app = Flask(__name__)
-app.secret_key = "full_project_2026"
+app.secret_key = "full_project_2026" # Klíč pro šifrování dat v session (cookies)
 
+# Univerzální funkce pro SQL dotazy
 def db_query(q, args=(), one=False):
-    with sqlite3.connect("../../Maturitka/tetris.db") as conn:
+    with sqlite3.connect("tetris.db") as conn:
         conn.row_factory = sqlite3.Row
         res = conn.execute(q, args).fetchall()
         return (res[0] if res else None) if one else res
 
 @app.route('/')
-def index(): return render_template('index.html')
+def index():
+    # Úvodní stránka s dokumentací projektu
+    return render_template('index.html')
 
 @app.route('/leaderboard')
 def leaderboard():
@@ -27,7 +30,7 @@ def login():
         if uid:
             session['user_id'], session['username'] = uid, request.form['username']
             return redirect(url_for('profile'))
-        err = "Chyba!"
+        err = "Chybné jméno nebo heslo!"
     return render_template('auth.html', mode='login', error=err)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -46,7 +49,9 @@ def profile():
 
 @app.route('/logout')
 def logout():
-    session.clear(); return redirect('/')
+    session.clear()
+    return redirect('/')
 
 if __name__ == '__main__':
-    database.init_db(); app.run(debug=True)
+    database.init_db() # Vytvoří DB tabulky při startu
+    app.run(debug=True)
