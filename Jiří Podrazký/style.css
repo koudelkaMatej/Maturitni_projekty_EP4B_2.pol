@@ -1,0 +1,220 @@
+body {
+  background: #0b0b18;
+  color: #00ffcc;
+  font-family: "Courier New", monospace;
+  text-align: center;
+}
+.auth-container {
+  margin: 100px auto;
+  width: 300px;
+  padding: 20px;
+  border: 2px solid #00ffcc;
+  border-radius: 10px;
+  background: #161625;
+}
+input {
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+  padding: 10px;
+  background: #0b0b18;
+  border: 1px solid #00ffcc;
+  color: #fff;
+}
+.btn {
+  background: #e94560;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  margin-top: 10px;
+}
+.btn-small {
+  background: #555;
+  color: #fff;
+  padding: 5px 10px;
+  text-decoration: none;
+  font-size: 0.8em;
+}
+.download-btn {
+  background: linear-gradient(45deg, #e94560, #ff2e63);
+  color: white;
+  padding: 15px 30px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2em;
+  border-radius: 5px;
+  display: inline-block;
+  margin: 20px 0;
+  box-shadow: 0 0 20px rgba(233, 69, 96, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.download-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(233, 69, 96, 0.7);
+  background: linear-gradient(45deg, #ff2e63, #e94560);
+}
+table {
+  margin: 20px auto;
+  border-collapse: collapse;
+  width: 80%;
+}
+th,
+td {
+  border: 1px solid #333;
+  padding: 12px;
+}
+th {
+  background: #16213e;
+  color: #e94560;
+}
+header {
+  padding: 20px;
+  border-bottom: 1px solid #333;
+}
+.pb-badge {
+  background: #16213e;
+  border: 2px solid #e94560;
+  padding: 20px;
+  margin: 20px auto;
+  width: fit-content;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(233, 69, 96, 0.4);
+}
+.pb-badge span {
+  font-size: 2em;
+  color: #fff;
+  display: block;
+}
+hr {
+  border: 0;
+  border-top: 1px solid #333;
+  margin: 40px 0;
+}
+
+/* Manual Section */
+.manual-section {
+  max-width: 900px;
+  margin: 40px auto;
+  text-align: left;
+  background: rgba(22, 33, 62, 0.5);
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.manual-section h2 {
+  color: #e94560;
+  text-align: center;
+  font-size: 2.2em;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  border-bottom: 2px solid #e94560;
+  display: inline-block;
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+.manual-card {
+  background: rgba(11, 11, 24, 0.7);
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+  transition: all 0.3s ease;
+}
+
+.manual-card:hover {
+  border-color: #00ffcc;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
+  transform: translateY(-2px);
+}
+
+.manual-card h3 {
+  color: #00ffcc;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.manual-card ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.manual-card li {
+  margin: 10px 0;
+  position: relative;
+  padding-left: 20px;
+}
+
+.manual-card li::before {
+  content: "•";
+  color: #e94560;
+  position: absolute;
+  left: 0;
+}
+
+.manual-card blockquote {
+  border-left: 4px solid #e94560;
+  margin: 20px 0;
+  padding: 10px 20px;
+  background: rgba(233, 69, 96, 0.1);
+  font-style: italic;
+}
+
+.enemy-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 20px 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.enemy-table th {
+  background: #16213e;
+  color: #00ffcc;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.enemy-table td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.enemy-type {
+  font-weight: bold;
+}
+
+.yellow-normal { color: #ffff00; }
+.green-tank { color: #00ff00; }
+.black-assassin { color: #ffffff; text-shadow: 0 0 5px #fff; }
+
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.upgrade-item {
+  background: rgba(0, 255, 204, 0.05);
+  border: 1px solid rgba(0, 255, 204, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.upgrade-item strong {
+  display: block;
+  color: #e94560;
+  margin-bottom: 5px;
+}
